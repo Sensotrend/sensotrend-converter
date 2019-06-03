@@ -1,13 +1,19 @@
 import moment from 'moment';
+import { DataFormatConverter } from '../../DataFormatConverter';
 
-// Class to convert Nightscout input data into intermediate Tidepool-like format
-
-export class NightscoutDataProcessor {
+/**
+ * Class to convert Nightscout input data into intermediate Tidepool-like format
+ */
+export class NightscoutDataProcessor extends DataFormatConverter {
 
    constructor(logger) {
-      this.logger = logger;
+      super(logger);
    }
 
+   /**
+    * Returns a Date object representing the record date
+    * @param {Object} record Tidepool format record
+    */
    getRecordTime(record) {
       var time;
 

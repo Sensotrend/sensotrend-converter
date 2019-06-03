@@ -1,127 +1,99 @@
+import path from 'path';
+import fs from 'fs-extra';
+import NodeCache from 'node-cache';
+
+/**
+ * Converter class that supports some specific data format
+ */
 export class DataFormatConverter {
+    /**
+     * Logger class for the converter. If provided, the logger must provide the following
+     * functions.
+     * 
+     * @typedef {Object} Logger
+     * @property {function} debug Called for debug-level logging
+     * @property {function} info Called for info-level logging
+     * @property {function} error Called for error-level logging
+     */
 
-   #__sourceFormat;
-   #__format;
+    /**
+     * 
+     * @param {Logger} [logger] Optional, used for logging. If not provided, the Javascript
+     * console will be used instead.    
+     */
+    constructor(logger) {
+        this.logger = logger;
+        this.cache = new NodeCache();
+        this.templateDirectory = __dirname;
+    }
 
-   constructor(logger) {
-      if (logger) {
-         this.logger = logger;
-      } else {
-         this.logger = {};
-         this.logger.error = console.error;
-         this.logger.info = console.log;
-      }
-      this.supportedFormats = {};
-      this.#__sourceFormat = Symbol('sourceFormat');
-      this.#__format = Symbol('format');
-   }
+    /**
+     * Returns a Date object representing the record date
+     * Classes that implement a DataFormatConverter MUST implement this method
+     * @param {Object} record record
+     */
+    getRecordTime(record) {
+        throw new Error('Implementation for getRecordTime() is missing');
+    }
 
-   log(message) {
-      if (this.logger) this.logger.info(message);
-   }
+    /**
+     * Import records from the format this conveter supports and output in the intermediate
+     * Tidepool wire format
+     * @param {Array} input Array of input objects
+     * @param {Object} options Options for converting the data
+     */
+    importRecords(input, options) {
+        throw new Error('Implementation for importRecords() is missing');
+    }
 
-   error(message) {
-      if (this.logger) this.logger.error(message);
-   }
+    /**
+     * Export records from the intermediate Tidepool format to the format supported by
+     * this converter
+     * @param {Array} input Array of input objects
+     * @param {Object} options Options for converting the data
+     */
+    exportRecords(input, options) {
+        throw new Error('Implementation for exportRecords() is missing');
+    }
 
-   registerFormatProcessor(format, processor) {
-      this.log('Registerered format processor for ' + format);
-      this.supportedFormats[format] = new processor(this.logger);
-   };
+    /**
+     * Implementations of a DataFormatConverter that use loadTemplate() MUST
+     * implement this function and return the directory that contains the
+     * template files as a result (possibly __dirname)
+     */
+    templatePath() {
+        return this.templateDirectory;
+    }
 
-   async importRecords(sourceData, options) {
-      if (!options.source) {
-         this.error('Trying to convert data without format spec');
-         return;
-      }
+    /**
+     * Load a stjs template file from current directory
+     * 
+     * @param {String} objectType String identifier for data type
+     */
+    async loadTemplate(objectType) {
 
-      let processor = this.supportedFormats[options.source];
-      if (!processor) {
-         this.error('No logger found for format: ' + options.source);
-         return false;
-      }
-      return processor.importRecords(sourceData, options);
-   };
+        const cached = this.cache.get(objectType);
+        if (cached) {
+            return cached;
+        }
 
-   async exportRecords(sourceData, options) {
-      if (!options.target) {
-         this.error('Trying to convert data without format spec');
-         return;
-      }
+        let filePath = path.resolve(this.templatePath(), objectType + '.json');
+        this.logger.debug("Loading template from: " +  filePath);
+        let template;
 
-      let processor = this.supportedFormats[options.target];
-      if (!processor) {
-         this.error('No logger found for format: ' + options.source);
-         return false;
-      }
-      return processor.exportRecords(sourceData, options);
-   };
-
-   /**
-    * @typedef {Object} DateFilter
-    * @param {Object} sourceData array of device ID / date pairs
-    */
-
-   /**
-    * Convert records 
-    * @param {array} sourceData Source data to be converted
-    * @param {Object} options Conversion options
-    * @param {Object} options.source Source format for data ('nightscout', 'tidepool' or 'fiphr')
-	 * @param {Object} options.target Target format for data ('nightscout', 'tidepool' or 'fiphr')
-	 * @param {DateFilter} [options.skipRecordsUsingDates] Filtering instructions for skipping some records
-    */
-   async convert(sourceData, options) {
-      let i = await this.importRecords(sourceData, options);
-
-      // Filter records if requested
-      if (options.skipRecordsUsingDates) {
-         const filtered = [];
-
-         i.forEach(function (r) {
-            if (options.skipRecordsUsingDates[r.deviceId]) {
-               const d = new Date(r.time);
-               if (options.skipRecordsUsingDates[r.deviceId] <= d) {
-                  filtered.push(r);
-               }
+        try {
+            const result = await fs.stat(filePath); // will fail if file does not exist
+            if (await fs.exists(filePath)) {
+                template = await fs.readFile(filePath, 'utf8');
             }
-         });
-         i = filtered;
-      }
+        } catch (error) {
+            this.logger.error('Data conversion error: template for object type "' + objectType + '" not found');
+            return false;
+        }
 
-      const e = await this.exportRecords(i, options);
+        const parsed = JSON.parse(template);
+        this.cache.set(objectType, parsed);
 
-      // Store the original record format as a non-enumerable property
-      const parent = this;
-      e.forEach(function (record) {
-         Object.defineProperty(record, parent.#__sourceFormat, {
-            value: options.source,
-            enumerable: false
-         });
-         Object.defineProperty(record, parent.#__format, {
-            value: options.target,
-            enumerable: false
-         });
-      });
-
-      return e;
-   };
-
-   getRecordFormat(record) {
-      return record[this.#__format];
-   }
-
-   getRecordSourceFormat(record) {
-      return record[this.#__sourceFormat];
-   }
-
-   getRecordTime(record) {
-      console.log('Record format is: ' + this.getRecordFormat(record));
-      const processor = this.supportedFormats[this.getRecordFormat(record)];
-      if (!processor) {
-         this.error('No converter found for record, format ' + this.getRecordFormat(record));
-         return false;
-      }
-      return processor.getRecordTime(record);
-   }
-
+        return parsed;
+    }
 }

@@ -1,7 +1,7 @@
-import { DataFormatConverter, DefaultConverter } from '../src/index.js';
+import { ConversionService, DefaultConversionService } from '../src/index.js';
 
-console.log(DataFormatConverter);
+console.log(ConversionService);
 
-const foo = new DataFormatConverter();
+const foo = new ConversionService();
 
-const bar = DefaultConverter();
+const bar = DefaultConversionService();

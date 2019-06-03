@@ -1,12 +1,15 @@
-// Class to convert Tidepool input data into intermediate Tidepool-like format
+import { DataFormatConverter } from '../../DataFormatConverter';
 
-export class TidepoolDataProcessor {
+/**
+ * Class to convert Tidepool input data into intermediate Tidepool-like format
+ */
+export class TidepoolDataProcessor extends DataFormatConverter {
 
    constructor(logger) {
-      this.logger = logger;
+      super(logger);
    }
 
-   convertRecordToIntermediate (r, options) {
+   convertRecordToIntermediate(r, options) {
       if (!r._converter) {
          r._converter = options.converter ? options.converter : 'Sensotrend Connect';
       }
@@ -21,7 +24,7 @@ export class TidepoolDataProcessor {
       return new Date(record.time);
    }
 
-   convertIntermediateToTidepool (r) {
+   convertIntermediateToTidepool(r) {
       return r;
    }
 
@@ -38,16 +41,9 @@ export class TidepoolDataProcessor {
       const conversionFunction = this.convertRecordToIntermediate;
       data.forEach(function (e) {
          const _e = conversionFunction(e, options);
-         if (_e) {
-            r.push(_e);
-         } else {
-            skipped += 1;
-         }
+         r.push(_e);
       });
 
-      if (skipped > 0) {
-         this.logger.info('Data converter skipped records: ' + skipped);
-      }
       return r;
    }
 
