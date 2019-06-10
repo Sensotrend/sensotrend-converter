@@ -91,7 +91,7 @@ export class DataFormatConverter {
             return false;
         }
 
-        const parsed = JSON.parse(template);
+        const parsed = Object.freeze(JSON.parse(template)); // Freeze the object given it's cached
         this.cache.set(objectType, parsed);
 
         return parsed;
