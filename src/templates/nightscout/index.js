@@ -1,6 +1,13 @@
 import moment from 'moment';
 import { DataFormatConverter } from '../../DataFormatConverter';
 
+function discoverDataType(record) {
+   if (record.insulin || record.carbs || record.created_at || record.duration) return 'treatments';
+   if (record.enteredBy || record.eventType ) return 'treatments';
+   if (record.direction || record.delta || record.sgv || record.mbg) return 'entries';
+   return 'treatments';
+}
+
 /**
  * Class to convert Nightscout input data into intermediate Tidepool-like format
  */
@@ -12,10 +19,10 @@ export class NightscoutDataProcessor extends DataFormatConverter {
 
    /**
     * Returns a Date object representing the record date
-    * @param {Object} record Tidepool format record
+    * @param {Object} record Nightscout format record
     */
    getRecordTime(record) {
-      var time;
+      let time;
 
       if (record.created_at) {
          time = new Date(record.created_at);
@@ -27,12 +34,20 @@ export class NightscoutDataProcessor extends DataFormatConverter {
 
    convertNSRecordToIntermediate(record, options) {
 
-      var time;
+      const dataType = options.datatypehint || discoverDataType(record);
+
+      let time;
 
       if (record.created_at) {
          time = moment.parseZone(record.created_at);
       } else {
-         time = record.dateString ? moment.parseZone(record.dateString) : moment(record.date);
+         // Prefer the millisecond field for the date for entries
+         // but parse the time zone from the string when available
+         const { date, dateString } = record;
+         time = date ? moment(date) : moment.parseZone(dateString);
+         if (!date && dateString) {
+            time.utcOffset(moment.parseZone(dateString).utcOffset());
+         }
       }
 
       let type = "";
@@ -48,7 +63,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
          , _converter: options.converter ? options.converter : 'Nightscout Connect'
       };
 
-      switch (options.datatypehint) {
+      switch (dataType) {
 
          case 'treatments':
             if (record.carbs && !isNaN(record.carbs)) {

@@ -146,7 +146,6 @@ describe('Data conversion service', function () {
       DataConverter.getRecordTime(r).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
    });
 
-
    it('should convert Nightscout CGM record to FIPHR and back', async function () {
 
       let ns_sample = [{
@@ -191,6 +190,48 @@ describe('Data conversion service', function () {
       records2[0].date.should.equal(ns_sample[0].date);
    });
 
+
+   it('should convert Nightscout CGM record to FIPHR and back without a data type hint', async function () {
+
+      let ns_sample = [{
+         "_id": "5c655105763fe276981ff0c2",
+         "device": "xDrip-DexcomG5",
+         "date": 1550143850509,
+         "dateString": "2019-02-14T13:30:50.509+0200",
+         "sgv": 177,
+         "delta": 15,
+         "direction": "FortyFiveUp",
+         "type": "sgv",
+         "filtered": 195071.0394182456,
+         "unfiltered": 196842.65552921052,
+         "rssi": 100,
+         "noise": 1,
+         "sysTime": "2019-02-14T13:30:50.509+0200"
+      }];
+
+      let options = {
+         source: 'nightscout',
+         target: 'fiphr',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records = await DataConverter.convert(ns_sample, options);
+
+      options = {
+         source: 'fiphr',
+         target: 'nightscout',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records2 = await DataConverter.convert(records, options);
+
+      records2[0].sgv.should.equal(177);
+      records2[0].type.should.equal("sgv");
+      records2[0].delta.should.equal(15);
+      records2[0].direction.should.equal('FortyFiveUp');
+      records2[0].noise.should.equal(1);
+      records2[0].date.should.equal(ns_sample[0].date);
+   });
 
    it('should convert Nightscout CGM record to FIPHR and back and not add fields', async function () {
 
