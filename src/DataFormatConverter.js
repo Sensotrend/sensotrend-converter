@@ -3,6 +3,25 @@ import fs from 'fs-extra';
 import NodeCache from 'node-cache';
 
 /**
+ * Deep freeze an object
+ * @param {Object} o Object to be deepfrozen
+ */
+function deepFreeze (o) {
+    Object.freeze(o);
+  
+    Object.getOwnPropertyNames(o).forEach(function (prop) {
+      if (o.hasOwnProperty(prop)
+      && o[prop] !== null
+      && (typeof o[prop] === "object" || typeof o[prop] === "function")
+      && !Object.isFrozen(o[prop])) {
+        deepFreeze(o[prop]);
+      }
+    });
+    
+    return o;
+  };
+
+/**
  * Converter class that supports some specific data format
  */
 export class DataFormatConverter {
@@ -91,7 +110,7 @@ export class DataFormatConverter {
             return false;
         }
 
-        const parsed = Object.freeze(JSON.parse(template)); // Freeze the object given it's cached
+        const parsed = deepFreeze(JSON.parse(template)); // Freeze the object given it's cached
         this.cache.set(objectType, parsed);
 
         return parsed;
