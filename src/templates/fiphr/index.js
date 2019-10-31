@@ -138,7 +138,8 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       let entry = sourceData; //_.cloneDeep(sourceData);
 
       entry.patientId = patientReference;
-      entry.time_fhir = moment(sourceData.time).utcOffset(sourceData.timezoneOffset).toISOString(true);
+      const time = moment(sourceData.time).utcOffset(sourceData.timezoneOffset);
+      entry.time_fhir = time.toISOString(true);
 
       let id = entry.type + ':' + entry.patientId + ':' + entry.deviceId + ':' + entry.time_fhir;
 
@@ -156,30 +157,33 @@ export class FIPHRDataProcessor extends DataFormatConverter {
 
       const textArray = [];
 
-      textArray.push("Aika: " + entry.time_fhir);
+      entry.formattedDate = time.format('D.M.YYYY H:mm:ss');
+      textArray.push("Aika: " + entry.formattedDate);
       textArray.push("Laite: " + entry.deviceId + ' (via ' + entry._converter + ')');
 
       // ensure records with a BG value have mmol values available
       if (entry.value && entry.units) {
          if (entry.units == 'mg/dL') {
             entry.valueMmol = Math.round((entry.value / 18.0156) * 100) / 100;
-            textArray.push("Tulos: " + entry.valueMmol + " mmol/l");
-
+            textArray.push("Tulos: " + (entry.valueMmol ? entry.valueMmol.toFixed(2) : "?") + " mmol/l");
+            /*
             if (entry.delta) {
                entry.deltaMmol = Math.round((entry.delta / 18.0156) * 100) / 100;
-               textArray.push("Muutos: " + entry.deltaMmol + " mmol/l");
+               textArray.push("Muutos: " + (entry.deltaMmol ? entry.deltaMmol.toFixed(2) : "?") + " mmol/l");
             }
+            */
          } else {
             entry.valueMmol = entry.value;
-            textArray.push("Tulos: " + entry.valueMmol) + " mmol/l";
-
+            textArray.push("Tulos: " + (entry.valueMmol ? entry.valueMmol.toFixed(1) : "?") + " mmol/l");
+            /*
             if (entry.delta) {
                entry.deltaMmol = entry.delta;
-               textArray.push("Muutos: " + entry.deltaMmol + " mmol/l");
+               textArray.push("Muutos: " + (entry.deltaMmol ? entry.deltaMmol.toFixed(2) : "?") + " mmol/l");
             }
+            */
          }
       }
-
+      /*
       if (entry.direction) {
          textArray.push("Suunta: " + entry.direction);
       }
@@ -187,6 +191,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       if (entry.noise) {
          textArray.push("Mittauslaatu: " + entry.noise);
       }
+      */
 
       entry._statusMessage = textArray.join('<br />');
 
