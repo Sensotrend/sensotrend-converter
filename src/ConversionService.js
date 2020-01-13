@@ -101,6 +101,9 @@ export class ConversionService {
                } else {
                   skipped += 1;
                }
+            } else {
+               // Different device, keep this
+               filtered.push(r);
             }
          });
          i = filtered;
