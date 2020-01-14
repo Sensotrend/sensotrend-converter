@@ -45,7 +45,7 @@
     "reference": "Patient/{{patientId}}"
   },
   "effectiveDateTime": "{{time_fhir}}",
-  "issued": "{{time_fhir}}",
+  "issued": "{{issued}}",
   "performer": [
     {
       "reference": "Patient/{{patientId}}"
