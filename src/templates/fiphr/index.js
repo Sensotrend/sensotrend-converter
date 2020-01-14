@@ -141,6 +141,8 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       const time = moment(sourceData.time).utcOffset(sourceData.timezoneOffset);
       entry.time_fhir = time.toISOString(true);
 
+      entry.issued = new Date.toISOString();
+
       let id = entry.type + ':' + entry.patientId + ':' + entry.deviceId + ':' + entry.time_fhir;
 
       if (entry.value) {
