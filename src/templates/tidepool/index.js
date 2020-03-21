@@ -30,36 +30,28 @@ export class TidepoolDataProcessor extends DataFormatConverter {
 
    // Convert records to intermediate format
    importRecords(input, options) {
-
-      this.logger.info('IMPORTING INTERMEDIATE');
-
+      this.logger.info('IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       const data = input.constructor == Array ? input : [input];
-
       let r = [];
-      let skipped = 0;
-
       const conversionFunction = this.convertRecordToIntermediate;
       data.forEach(function (e) {
          const _e = conversionFunction(e, options);
          r.push(_e);
       });
-
+      this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    }
 
    // Convert records to intermediate format
    exportRecords(input, options) {
-
-      this.logger.info('EXPORTING INTERMEDIATE')
-
+      this.logger.info('EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       const data = input.constructor == Array ? input : [input];
-
       const r = [];
       const conversionFunction = this.convertIntermediateToTidepool;
       data.forEach(function (e) {
-         r.push(conversionFunction(e));
+         r.push(conversionFunction(e, options));
       });
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    }
-
 }

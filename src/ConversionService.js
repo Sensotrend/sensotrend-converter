@@ -46,12 +46,16 @@ export class ConversionService {
    async importRecords(sourceData, options) {
       if (!options.source) {
          this.error('Trying to convert data without format spec');
+         this.logger.debug(JSON.stringify(options));
+         this.logger.debug(JSON.stringify(sourceData));
          throw new Error('Trying to convert data without format spec');
       }
 
       let processor = this.supportedFormats[options.source];
       if (!processor) {
          this.error('No import processor found for format: ' + options.source);
+         this.logger.debug(JSON.stringify(options));
+         this.logger.debug(JSON.stringify(sourceData));
          throw new Error('No import processor found for format: ' + options.source);
       }
       return processor.importRecords(sourceData, options);
@@ -60,12 +64,16 @@ export class ConversionService {
    async exportRecords(sourceData, options) {
       if (!options.target) {
          this.error('Trying to convert data without format spec');
+         this.logger.debug(JSON.stringify(options));
+         this.logger.debug(JSON.stringify(sourceData));
          throw new Error('Trying to convert data without format spec');
       }
 
       let processor = this.supportedFormats[options.target];
       if (!processor) {
          this.error('No export processor found for format: ' + options.source);
+         this.logger.debug(JSON.stringify(options));
+         this.logger.debug(JSON.stringify(sourceData));
          throw new Error('No export processor found for format: ' + options.source);
       }
       return processor.exportRecords(sourceData, options);
@@ -139,11 +147,12 @@ export class ConversionService {
    }
 
    getRecordTime(record) {
-      console.log('Record format is: ' + this.getRecordFormat(record));
+      this.logger.debug('Record format is: ' + this.getRecordFormat(record));
       const processor = this.supportedFormats[this.getRecordFormat(record)];
       if (!processor) {
          this.error('No converter found for record, format ' + this.getRecordFormat(record));
-         throw new Error('No converter found for record, format');
+         this.logger.debug(JSON.stringify(record));
+         throw new Error('No converter found for record, format '  + this.getRecordFormat(record));
       }
       return processor.getRecordTime(record);
    }
