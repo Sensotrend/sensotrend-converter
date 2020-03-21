@@ -184,7 +184,7 @@ describe('Data conversion service', function () {
 
       records2[0].sgv.should.equal(177);
       records2[0].type.should.equal("sgv");
-      records2[0].delta.should.equal(15);
+      // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
       records2[0].date.should.equal(ns_sample[0].date);
@@ -227,7 +227,7 @@ describe('Data conversion service', function () {
 
       records2[0].sgv.should.equal(177);
       records2[0].type.should.equal("sgv");
-      records2[0].delta.should.equal(15);
+      // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
       records2[0].date.should.equal(ns_sample[0].date);
