@@ -76,13 +76,15 @@ export class NightscoutDataProcessor extends DataFormatConverter {
             if (record.insulin && !isNaN(record.insulin)) {
                e.insulin = record.insulin;
                e.type = 'wizard';
-               e.subType = "normal";
+               e.subType = 'normal';
                e.normal = record.insulin;
             }
             break;
 
          case 'entries':
-            if (record.sgv) e.type = 'cbg';
+            // Tidepool Uploader treats Freestyle Libre scans as measurements
+            // See https://github.com/tidepool-org/uploader/issues/1141
+            if (record.sgv || (record.mbg && record.subType === 'scanned')) e.type = 'cbg';
             if (record.mbg) e.type = 'smbg';
             e.units = 'mg/dL';
             e.value = record.sgv ? Number(record.sgv) : Number(record.mbg);
