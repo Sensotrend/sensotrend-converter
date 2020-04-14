@@ -22,7 +22,9 @@ export class ConversionService {
       this.supportedFormats = {};
       this.#__sourceFormat = Symbol('sourceFormat');
       this.#__format = Symbol('format');
-      this.logger.info('New ConversionService instantiated');
+      const version = process.env.npm_package_version;
+
+      this.logger.info('New ConversionService instantiated, version ' + version);
    }
 
    log(message) {
