@@ -314,7 +314,7 @@ describe('Data conversion service', function () {
    });
 
 
-   it('should convert FIPHR data to Tidepool and back', async function () {
+   it('should convert FIPHR carb data to Tidepool and back', async function () {
 
       let FHIRCarbEntry = {
          "resourceType": "Observation",
@@ -390,6 +390,38 @@ describe('Data conversion service', function () {
       records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
       records2[0].effectiveDateTime.should.equal(FHIRCarbEntry.effectiveDateTime);
       records2[0].code.coding[0].code.should.equal("9059-7");
+
+   });
+
+   it('should convert Libre scan data from Tidepool to a CGM entry', async function () {
+
+      const tidepoolLibreScanEntry = {
+         "time": "2018-01-09T21:42:10.000Z",
+         "timezoneOffset": -60,
+         "clockDriftOffset": -638000,
+         "conversionOffset": 0,
+         "deviceTime": "2018-01-09T20:42:10",
+         "deviceId": "AbbottFreeStyleLibre-JCMX144-K3442",
+         "type": "smbg",
+         "value": 161,
+         "units": "mg/dL",
+         "subType": "scanned",
+         "payload": {
+            "logIndices": [8066]
+         }
+      };
+
+      const options = {
+         source: 'tidepool',
+         target: 'fiphr',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+
+      const records = await DataConverter.convert(tidepoolLibreScanEntry, options);
+
+      console.log('TIDE TO FHIR', records);
+      records[0].code.coding[0].code.should.equal("14745-4");
 
    });
 

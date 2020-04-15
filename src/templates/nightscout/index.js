@@ -82,13 +82,8 @@ export class NightscoutDataProcessor extends DataFormatConverter {
             break;
 
          case 'entries':
-            // Tidepool Uploader treats Freestyle Libre scans as measurements
-            // See https://github.com/tidepool-org/uploader/issues/1141
-            if (record.sgv || (record.mbg && record.subType === 'scanned')) {
+            if (record.sgv) {
                e.type = 'cbg';
-               if (record.subType === 'scanned') {
-                  e.subType = 'scanned';
-               }
             } else if (record.mbg) {
                e.type = 'smbg';
             }

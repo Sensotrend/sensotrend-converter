@@ -13,6 +13,11 @@ export class TidepoolDataProcessor extends DataFormatConverter {
       if (!r._converter) {
          r._converter = options.converter ? options.converter : 'Sensotrend Connect';
       }
+      // Tidepool Uploader treats Freestyle Libre scans as measurements
+      // See https://github.com/tidepool-org/uploader/issues/1141
+      if (r.type === 'smbg' && r.subType === 'scanned') {
+         r.type = 'cbg';
+      }
       return r;
    }
 
