@@ -107,7 +107,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
          var template = await this.loadTemplate('export_' + type + code);
 
          if (!template) {
-            this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');
+            this.logger.error('ALERT! FHIR resource type ' + sourceData.type + ' not handled');
             this.logger.debug(JSON.stringify(sourceData));
             return;
          }
