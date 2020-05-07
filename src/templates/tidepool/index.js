@@ -1,5 +1,7 @@
 import { DataFormatConverter } from '../../DataFormatConverter';
 
+const converterName = process.env.CONVERTER_NAME || 'Sensotrend Connect';
+
 /**
  * Class to convert Tidepool input data into intermediate Tidepool-like format
  */
@@ -9,9 +11,10 @@ export class TidepoolDataProcessor extends DataFormatConverter {
       super(logger);
    }
 
+
    convertRecordToIntermediate(r, options) {
       if (!r._converter) {
-         r._converter = options.converter ? options.converter : 'Sensotrend Connect';
+         r._converter = options.converter || converterName;
       }
       // Tidepool Uploader treats Freestyle Libre scans as measurements
       // See https://github.com/tidepool-org/uploader/issues/1141
