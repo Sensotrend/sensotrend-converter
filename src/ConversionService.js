@@ -1,3 +1,4 @@
+import {version} from '../package.json';
 /**
  * Data converter module
  */
@@ -22,7 +23,6 @@ export class ConversionService {
       this.supportedFormats = {};
       this.#__sourceFormat = Symbol('sourceFormat');
       this.#__format = Symbol('format');
-      const version = process.env.npm_package_version;
 
       this.logger.info('New ConversionService instantiated, version ' + version);
    }
