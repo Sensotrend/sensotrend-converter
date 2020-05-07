@@ -115,7 +115,7 @@ describe('Data conversion service', function () {
    });
 
 
-   it('know record formats and time', async function () {
+   it('should know record formats and time', async function () {
 
       let tidepool_sample = [{
             "time": "2017-01-26T18:49:35.000Z",
