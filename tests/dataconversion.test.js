@@ -67,6 +67,77 @@ describe('Data conversion service', function () {
 
    });
 
+   it('should convert Tidepool bolus wizard record to FIPHR and back', async function () {
+
+      let tidepool_sample = [{
+         "time": "2019-02-22T16:43:53.000Z",
+         "timezoneOffset": 180,
+         "clockDriftOffset": -2000,
+         "conversionOffset": -518761000,
+         "deviceTime": "2019-02-16T19:37:52",
+         "deviceId": "MMT-1711:NG1112288H",
+         "type": "wizard",
+         "recommended": {
+            "carb": 0.4,
+            "correction": 0,
+            "net": 0.4
+         },
+         "carbInput": 5,
+         "insulinOnBoard": 0,
+         "insulinCarbRatio": 12,
+         "insulinSensitivity": 2.3,
+         "bgTarget": {
+            "low": 5.7,
+            "high": 5.7
+         },
+         "bolus": {
+            "time": "2019-02-22T16:43:56.000Z",
+            "timezoneOffset": 180,
+            "clockDriftOffset": -2000,
+            "conversionOffset": -518761000,
+            "deviceTime": "2019-02-16T19:37:55",
+            "deviceId": "MMT-1711:NG1112288H",
+            "type": "bolus",
+            "subType": "normal",
+            "normal": 0.4,
+            "payload": {
+               "logIndices": [2185299645]
+            }
+         },
+         "units": "mmol/L",
+         "payload": {
+            "logIndices": [2185299642]
+         },
+         "carbUnits": "grams"
+      }];
+
+      console.log('Converting tidepool wizard entry to FHIR');
+
+      let options = {
+         source: 'tidepool',
+         target: 'fiphr',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records = await DataConverter.convert(tidepool_sample, options);
+
+      console.log('Intermediate wizard entry', records);
+
+      options = {
+         source: 'fiphr',
+         target: 'tidepool',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records2 = await DataConverter.convert(records, options);
+
+      records2[0].type.should.equal("wizard");
+      records2[0].deviceId.should.equal("MMT-1711:NG1112288H");
+      records2[0].time.should.equal("2019-02-22T16:43:53.000Z");
+
+   });
+
+
    it('should skip old records when requested', async function () {
 
       let tidepool_sample = [{

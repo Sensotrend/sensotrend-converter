@@ -230,17 +230,18 @@ export class FIPHRDataProcessor extends DataFormatConverter {
          if (record.type == 'wizard') {
             if (record.carbInput) {
                let entry = _.cloneDeep(record);
-               entry.type = "carbs";
+               entry.type = 'carbs';
                d.push(entry);
             }
             if (record.normal) {
                let entry = _.cloneDeep(record);
-               entry.type = "bolus";
+               entry.type = 'bolus';
                d.push(entry);
             }
             if (record.bolus) {
                if (record.bolus.type) {
                   let entry = _.cloneDeep(record.bolus);
+                  entry._converter = record._converter;
                   d.push(entry);
                }
             }
