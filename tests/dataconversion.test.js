@@ -53,6 +53,8 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(tidepool_sample, options);
 
+      records[0].effectiveDateTime.should.equal("2019-01-26T20:49:35.000+02:00");
+
       options = {
          source: 'fiphr',
          target: 'tidepool',
@@ -110,8 +112,6 @@ describe('Data conversion service', function () {
          },
          "carbUnits": "grams"
       }];
-
-      console.log('Converting tidepool wizard entry to FHIR');
 
       let options = {
          source: 'tidepool',
@@ -211,10 +211,13 @@ describe('Data conversion service', function () {
       };
 
       let records = await DataConverter.convert(tidepool_sample, options);
-      const r = records[0];
-      DataConverter.getRecordFormat(r).should.equal('fiphr');
-      DataConverter.getRecordSourceFormat(r).should.equal('tidepool');
-      DataConverter.getRecordTime(r).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
+      const r1 = records[0];
+      DataConverter.getRecordFormat(r1).should.equal('fiphr');
+      DataConverter.getRecordSourceFormat(r1).should.equal('tidepool');
+      DataConverter.getRecordTime(r1).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
+
+      r1.effectiveDateTime.should.equal('2017-01-26T20:49:35.000+02:00');
+
    });
 
    it('should convert Nightscout CGM record to FIPHR and back', async function () {
@@ -446,8 +449,6 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(FHIRCarbEntry, options);
 
-      console.log('FHIR TO TIDE', records);
-
       options = {
          source: 'tidepool',
          target: 'fiphr',
@@ -455,8 +456,6 @@ describe('Data conversion service', function () {
       };
 
       let records2 = await DataConverter.convert(records, options);
-
-      console.log('TIDE TO FHIR', records2);
 
       records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
       records2[0].effectiveDateTime.should.equal(FHIRCarbEntry.effectiveDateTime);
@@ -491,8 +490,8 @@ describe('Data conversion service', function () {
 
       const records = await DataConverter.convert(tidepoolLibreScanEntry, options);
 
-      console.log('TIDE TO FHIR', records);
       records[0].code.coding[0].code.should.equal("14745-4");
+      records[0].effectiveDateTime.should.equal('2018-01-09T20:42:10.000-01:00');
 
    });
 
