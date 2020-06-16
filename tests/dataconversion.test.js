@@ -25,6 +25,28 @@ DataConverter.registerFormatProcessor('fiphr', FIPHRDataProcessor);
 DataConverter.registerFormatProcessor('tidepool', TidepoolDataProcessor);
 
 describe('Data conversion service', function () {
+/*
+   Content:   
+   - Tidepool bolus record to FIPHR and back
+   - skip old records when requested
+   - know record formats and time
+   - Nightscout CGM record to FIPHR and back
+   - Nightscout CGM record to FIPHR and back without a data type hint
+   - Nightscout CGM record to FIPHR and back and not add fields
+   - Nightscout bolus wizard record (bolus + carbs) to FIPHR and back
+   - FIPHR data (carbs) to Tidepool and back
+   - Nightscout data (CGM) to Tidepool and back
+
+   Missing(?):
+   - CGM record from Tidebool to FHIR and back
+   - Carbs from Tidebool to Nightscout and back
+   - Bolus records
+   - Insulin injections
+   - Blood glucose measurements from fingerstick
+   - Special cases, like Lo and Hi in CGM
+*/
+
+   let sample_logging = false;
 
    it('should convert Tidepool bolus record to FIPHR and back', async function () {
 
@@ -53,15 +75,19 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(tidepool_sample, options);
 
+      records.length.should.equal(1);
       records[0].resourceType.should.equal("MedicationAdministration");
       records[0].language.should.equal("fi");
       records[0].status.should.equal("completed");
       records[0].medicationCodeableConcept.text.should.equal("Lyhytvaikutteinen insuliini")
       records[0].effectiveDateTime.should.equal("2019-01-26T20:49:35.000+02:00");
       records[0].dosage.text.should.equal("Lyhytvaikutteinen insuliini, 0.1 yksikköä");
-      records[0].dosage.dose.value.should.equal(0.1);
+      records[0].dosage.dose.value.should.equal(tidepool_sample[0].normal);
       records[0].dosage.dose.unit.should.equal("U");
-      //console.log('Got FHIR resource', records[0]);
+      if (sample_logging) {
+         console.log('Tidepool sample', tidepool_sample);
+         console.log('Tidepool sample converted to FHIR resource', records);
+      }
 
       options = {
          source: 'fiphr',
@@ -71,14 +97,17 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      records2[0].time.should.equal("2019-01-26T18:49:35.000Z");
-      records2[0].timezoneOffset.should.equal(120);
-      records2[0].deviceId.should.equal("MedT-554-450960");
-      records2[0].type.should.equal("bolus");
-      records2[0].subType.should.equal("normal");
-      records2[0].insulin.should.equal(0.1);
-      records2[0].normal.should.equal(0.1);
-      //console.log('Got FHIR resource', records2[0]);
+      records2.length.should.equal(1);
+      records2[0].time.should.equal(tidepool_sample[0].time);
+      records2[0].timezoneOffset.should.equal(tidepool_sample[0].timezoneOffset);
+      records2[0].deviceId.should.equal(tidepool_sample[0].deviceId);
+      records2[0].type.should.equal(tidepool_sample[0].type);
+      records2[0].subType.should.equal(tidepool_sample[0].subType);
+      records2[0].insulin.should.equal(tidepool_sample[0].normal);
+      records2[0].normal.should.equal(tidepool_sample[0].normal);
+      if (sample_logging) {
+         console.log('FHIR resource converted back to Tidepool', records2);
+      }
 
    });
 
@@ -128,6 +157,10 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(tidepool_sample, options);
       records.length.should.equal(1);
+      if (sample_logging) {
+         console.log('Tidepool sample', tidepool_sample);
+         console.log('Tidepool sample converted to FHIR resource (1st record should be skipped)', records);
+      }
 
       // No records should be skipped
       let skipData2 = {
@@ -142,7 +175,10 @@ describe('Data conversion service', function () {
       };
 
       let records2 = await DataConverter.convert(tidepool_sample, options2);
-      records2.length.should.equal(2);
+      records2.length.should.equal(2);      
+      if (sample_logging) {
+         console.log('Tidepool sample converted to FHIR resource (No records should be skipped)', records2);
+      }
 
       // Both records should be skipped
       let skipData3 = {
@@ -157,7 +193,10 @@ describe('Data conversion service', function () {
       };
 
       let records3 = await DataConverter.convert(tidepool_sample, options3);
-      records3.length.should.equal(0);
+      records3.length.should.equal(0);     
+      if (sample_logging) {
+         console.log('Tidepool sample converted to FHIR resource (Both records should be skipped)', records3);
+      }
    });
 
 
@@ -190,6 +229,11 @@ describe('Data conversion service', function () {
       DataConverter.getRecordFormat(r).should.equal('fiphr');
       DataConverter.getRecordSourceFormat(r).should.equal('tidepool');
       DataConverter.getRecordTime(r).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
+
+      if (sample_logging) {
+         console.log('Tidepool sample', tidepool_sample);
+         console.log('Tidepool sample converted to FHIR resource', records);
+      }
    });
 
    it('should convert Nightscout CGM record to FIPHR and back', async function () {
@@ -219,6 +263,7 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(ns_sample, options);
 
+      records.length.should.equal(1);
       records[0].resourceType.should.equal("Observation");
       records[0].language.should.equal("fi");
       records[0].status.should.equal("final");
@@ -226,7 +271,10 @@ describe('Data conversion service', function () {
       records[0].issued.should.equal("2019-02-14T13:30:50.509+02:00");
       records[0].valueQuantity.value.should.equal(9.82);
       records[0].valueQuantity.unit.should.equal("mmol/l");
-      //console.log('Got FHIR resource', records[0]);
+      if (sample_logging) {
+         console.log('Nightscout sample', ns_sample);
+         console.log('Nightscout sample converted to FHIR resource', records);
+      }
 
       options = {
          source: 'fiphr',
@@ -237,16 +285,19 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      records2[0].device.should.equal("xDrip-DexcomG5");
-      records2[0].date.should.equal(1550143850509);
+      records2.length.should.equal(1);
+      records2[0].device.should.equal(ns_sample[0].device);
+      records2[0].date.should.equal(ns_sample[0].date);
       records2[0].dateString.should.equal("2019-02-14T13:30:50+02:00");
-      records2[0].sgv.should.equal(177);
-      records2[0].type.should.equal("sgv");
+      records2[0].sgv.should.equal(ns_sample[0].sgv);
+      records2[0].type.should.equal(ns_sample[0].type);
       // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
-      records2[0].date.should.equal(ns_sample[0].date);
-      //console.log('Got FHIR resource', records2[0]);
+      records2[0].sysTime.should.equal("2019-02-14T13:30:50+02:00");
+      if (sample_logging) {
+         console.log('FHIR resource converted back to Nightscout', records2);
+      }
    });
 
    it('should convert Nightscout CGM record to FIPHR and back without a data type hint', async function () {
@@ -275,6 +326,7 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(ns_sample, options);
 
+      records.length.should.equal(1);
       records[0].resourceType.should.equal("Observation");
       records[0].language.should.equal("fi");
       records[0].status.should.equal("final");
@@ -282,7 +334,10 @@ describe('Data conversion service', function () {
       records[0].issued.should.equal("2019-02-14T13:30:50.509+02:00");
       records[0].valueQuantity.value.should.equal(9.82);
       records[0].valueQuantity.unit.should.equal("mmol/l");
-      //console.log('Got FHIR resource', records[0]);
+      if (sample_logging) {
+         console.log('Nightscout sample', ns_sample);
+         console.log('Nightscout sample converted to FHIR resource', records);
+      }
 
       options = {
          source: 'fiphr',
@@ -292,16 +347,19 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      records2[0].device.should.equal("xDrip-DexcomG5");
-      records2[0].date.should.equal(1550143850509);
+      records2.length.should.equal(1);
+      records2[0].device.should.equal(ns_sample[0].device);
+      records2[0].date.should.equal(ns_sample[0].date);
       records2[0].dateString.should.equal("2019-02-14T13:30:50+02:00");
-      records2[0].sgv.should.equal(177);
-      records2[0].type.should.equal("sgv");
+      records2[0].sgv.should.equal(ns_sample[0].sgv);
+      records2[0].type.should.equal(ns_sample[0].type);
       // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
-      records2[0].date.should.equal(ns_sample[0].date);
-      //console.log('Got FHIR resource', records2[0]);
+      records2[0].sysTime.should.equal("2019-02-14T13:30:50+02:00");
+      if (sample_logging) {
+         console.log('FHIR resource converted back to Nightscout', records2);
+      }
    });
 
    it('should convert Nightscout CGM record to FIPHR and back and not add fields', async function () {
@@ -325,6 +383,7 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(ns_sample, options);
 
+      records.length.should.equal(1);
       records[0].resourceType.should.equal("Observation");
       records[0].language.should.equal("fi");
       records[0].status.should.equal("final");
@@ -332,7 +391,10 @@ describe('Data conversion service', function () {
       records[0].issued.should.equal("2019-02-14T13:30:50.509+02:00");
       records[0].valueQuantity.value.should.equal(9.82);
       records[0].valueQuantity.unit.should.equal("mmol/l");
-      //console.log('Got FHIR resource', records[0]);
+      if (sample_logging) {
+         console.log('Nightscout sample', ns_sample);
+         console.log('Nightscout sample converted to FHIR resource', records);
+      }
 
       options = {
          source: 'fiphr',
@@ -343,16 +405,19 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      records2[0].device.should.equal("xDrip-DexcomG5");
-      records2[0].date.should.equal(1550143850509);
+      records2.length.should.equal(1);
+      records2[0].device.should.equal(ns_sample[0].device);
+      records2[0].date.should.equal(ns_sample[0].date);
       records2[0].dateString.should.equal("2019-02-14T13:30:50+02:00");
-      records2[0].sgv.should.equal(177);
-      records2[0].type.should.equal("sgv");
+      records2[0].sgv.should.equal(ns_sample[0].sgv);
+      records2[0].type.should.equal(ns_sample[0].type);
       should.not.exist(records2[0].delta);
       should.not.exist(records2[0].direction);
       should.not.exist(records2[0].noise);
-      records2[0].date.should.equal(ns_sample[0].date);
-      //console.log('Got FHIR resource', records2[0]);
+      records2[0].sysTime.should.equal("2019-02-14T13:30:50+02:00");
+      if (sample_logging) {
+         console.log('FHIR resource converted back to Nightscout', records2);
+      }
    });
 
    it('should convert Nightscout bolus wizard record to FIPHR and back', async function () {
@@ -391,7 +456,7 @@ describe('Data conversion service', function () {
       records[0].status.should.equal("final");
       records[0].effectiveDateTime.should.equal("2019-04-01T10:26:23.000+03:00");
       records[0].issued.should.equal("2019-04-01T10:26:23.000+03:00");
-      records[0].valueQuantity.value.should.equal(15);
+      records[0].valueQuantity.value.should.equal(ns_sample[0].carbs);
       records[0].valueQuantity.unit.should.equal("g");
 
       records[1].resourceType.should.equal("MedicationAdministration");
@@ -399,8 +464,10 @@ describe('Data conversion service', function () {
       records[1].status.should.equal("completed");
       records[1].effectiveDateTime.should.equal("2019-04-01T10:26:23.000+03:00");
       records[1].dosage.text.should.equal("Lyhytvaikutteinen insuliini, 1.3 yksikköä");
-      //console.log('Nightscout data sample', ns_sample);
-      console.log('Got FHIR resource', records);
+      if (sample_logging) {
+         console.log('Nightscout sample', ns_sample);
+         console.log('Nightscout sample converted to FHIR resource', records);
+      }
 
       options = {
          source: 'fiphr',
@@ -414,12 +481,15 @@ describe('Data conversion service', function () {
       records2.length.should.equal(2);
 
       records2[0].created_at.should.equal(ns_sample[0].created_at);
-      records2[0].carbs.should.equal(15);
+      records2[0].carbs.should.equal(ns_sample[0].carbs);
       records2[0].type.should.equal("Meal Bolus");
+
       records2[1].created_at.should.equal(ns_sample[0].created_at);
-      records2[1].insulin.should.equal(1.3);
+      records2[1].insulin.should.equal(ns_sample[0].insulin);
       records2[1].type.should.equal("Meal Bolus");
-      //console.log('Got FHIR resource', records2);
+      if (sample_logging) {
+         console.log('FHIR resource converted back to Nightscout', records2);
+      }
    });
 
    it('should convert FIPHR data to Tidepool and back', async function () {
@@ -482,8 +552,18 @@ describe('Data conversion service', function () {
       };
 
       let records = await DataConverter.convert(FHIRCarbEntry, options);
-
-      console.log('FHIR TO TIDE', records);
+ 
+      records.length.should.equal(1);
+      records[0].time.should.equal("2019-04-01T08:21:28.000Z");
+      records[0].timezoneOffset.should.equal(180);
+      records[0].deviceTime.should.equal("2019-04-01T08:21:28.000Z");
+      records[0].deviceId.should.equal("MDT-554");
+      records[0].type.should.equal("wizard");
+      records[0].carbInput.should.equal(FHIRCarbEntry.valueQuantity.value);
+      if (sample_logging) {
+         console.log('FHIR carb entry', FHIRCarbEntry);
+         console.log('FHIR carb entry converted to Tidepool', records);
+      }
 
       options = {
          source: 'tidepool',
@@ -493,11 +573,16 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      console.log('TIDE TO FHIR', records2);
-
-      records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
+      records2.length.should.equal(1); 
+      records2[0].resourceType.should.equal(FHIRCarbEntry.resourceType);
+      records2[0].language.should.equal(FHIRCarbEntry.language);
       records2[0].effectiveDateTime.should.equal(FHIRCarbEntry.effectiveDateTime);
       records2[0].code.coding[0].code.should.equal("9059-7");
+      records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
+      records2[0].valueQuantity.unit.should.equal(FHIRCarbEntry.valueQuantity.unit);
+      if (sample_logging) {
+         console.log('Tidepool record converted back to FHIR carb entry', records2);
+      }
 
    });
 
@@ -529,7 +614,20 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(ns_sample, options);
 
-      console.log('records', records);
+      records.length.should.equal(1);
+      records[0].time.should.equal("2019-02-14T11:30:50.509Z");
+      records[0].timezoneOffset.should.equal(120);
+      records[0].deviceId.should.equal(ns_sample[0].device);
+      records[0].type.should.equal("cbg");
+      records[0].units.should.equal("mg/dL");
+      records[0].value.should.equal(ns_sample[0].sgv);
+      records[0].delta.should.equal(ns_sample[0].delta);
+      records[0].noise.should.equal(ns_sample[0].noise);
+      records[0].direction.should.equal(ns_sample[0].direction);
+      if (sample_logging) {
+         console.log('Nightscout sample', ns_sample);
+         console.log('Nightscout sample converted to Tidepool', records);
+      }
 
       options = {
          source: 'tidepool',
@@ -539,11 +637,15 @@ describe('Data conversion service', function () {
       };
 
       let records2 = await DataConverter.convert(records, options);
-      records2[0].sgv.should.equal(177);
-      records2[0].delta.should.equal(1.5);
-      records2[0].noise.should.equal(1);
-      records2[0].direction.should.equal("Flat");
-      records2[0].device.should.equal("xDrip-DexcomG5");
+      records2[0].device.should.equal(ns_sample[0].device);
+      records2[0].date.should.equal(ns_sample[0].date);
+      records2[0].sgv.should.equal(ns_sample[0].sgv);
+      records2[0].delta.should.equal(ns_sample[0].delta);
+      records2[0].direction.should.equal(ns_sample[0].direction);
+      records2[0].noise.should.equal(ns_sample[0].noise);
+      if (sample_logging) {
+         console.log('Tidepool data converted back to Nightscout', records2);
+      }
 
    });
 });
