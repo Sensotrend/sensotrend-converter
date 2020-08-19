@@ -54,6 +54,8 @@ describe('Data conversion service', function () {
       let records = await DataConverter.convert(tidepool_sample, options);
 
       records[0].effectiveDateTime.should.equal("2019-01-26T20:49:35.000+02:00");
+      records[0].resourceType.should.equal("MedicationAdministration");
+      console.log('Got FHIR resource', records[0]);
 
       options = {
          source: 'fiphr',
@@ -66,6 +68,8 @@ describe('Data conversion service', function () {
       records2[0].normal.should.equal(0.1);
       records2[0].deviceId.should.equal("MedT-554-450960");
       records2[0].time.should.equal("2019-01-26T18:49:35.000Z");
+      records2[0].type.should.equal("bolus");
+      // records2[0].subtype.should.equal("normal");
 
    });
 
