@@ -1,7 +1,9 @@
 {
     "resourceType": "Observation",
     "meta": {
-        "profile": "http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3"
+        "profile": [
+            "http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3"
+        ]
     },
     "language": "fi",
     "text": {
