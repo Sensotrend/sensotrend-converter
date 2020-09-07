@@ -1,5 +1,7 @@
 import { DataFormatConverter } from '../../DataFormatConverter';
 
+const converterName = process.env.CONVERTER_NAME || 'Sensotrend Connect';
+
 /**
  * Class to convert Tidepool input data into intermediate Tidepool-like format
  */
@@ -9,9 +11,15 @@ export class TidepoolDataProcessor extends DataFormatConverter {
       super(logger);
    }
 
+
    convertRecordToIntermediate(r, options) {
       if (!r._converter) {
-         r._converter = options.converter ? options.converter : 'Sensotrend Connect';
+         r._converter = options.converter || converterName;
+      }
+      // Tidepool Uploader treats Freestyle Libre scans as measurements
+      // See https://github.com/tidepool-org/uploader/issues/1141
+      if (r.type === 'smbg' && r.subType === 'scanned') {
+         r.type = 'cbg';
       }
       return r;
    }
@@ -30,36 +38,28 @@ export class TidepoolDataProcessor extends DataFormatConverter {
 
    // Convert records to intermediate format
    importRecords(input, options) {
-
-      this.logger.info('IMPORTING INTERMEDIATE');
-
+      this.logger.info('IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       const data = input.constructor == Array ? input : [input];
-
       let r = [];
-      let skipped = 0;
-
       const conversionFunction = this.convertRecordToIntermediate;
       data.forEach(function (e) {
          const _e = conversionFunction(e, options);
          r.push(_e);
       });
-
+      this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    }
 
    // Convert records to intermediate format
    exportRecords(input, options) {
-
-      this.logger.info('EXPORTING INTERMEDIATE')
-
+      this.logger.info('EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       const data = input.constructor == Array ? input : [input];
-
       const r = [];
       const conversionFunction = this.convertIntermediateToTidepool;
       data.forEach(function (e) {
-         r.push(conversionFunction(e));
+         r.push(conversionFunction(e, options));
       });
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    }
-
 }

@@ -1,7 +1,9 @@
 {
     "resourceType": "Observation",
     "meta": {
-        "profile": "http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3"
+        "profile": [
+            "http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3"
+        ]
     },
     "language": "fi",
     "text": {
@@ -39,7 +41,7 @@
         "reference": "Patient/{{patientId}}"
     },
     "effectiveDateTime": "{{time_fhir}}",
-    "issued": "{{time_fhir}}",
+    "issued": "{{issued}}",
     "performer": [
         {
             "reference": "Patient/{{patientId}}"

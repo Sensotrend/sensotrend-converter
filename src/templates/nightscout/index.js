@@ -76,14 +76,17 @@ export class NightscoutDataProcessor extends DataFormatConverter {
             if (record.insulin && !isNaN(record.insulin)) {
                e.insulin = record.insulin;
                e.type = 'wizard';
-               e.subType = "normal";
+               e.subType = 'normal';
                e.normal = record.insulin;
             }
             break;
 
          case 'entries':
-            if (record.sgv) e.type = 'cbg';
-            if (record.mbg) e.type = 'smbg';
+            if (record.sgv) {
+               e.type = 'cbg';
+            } else if (record.mbg) {
+               e.type = 'smbg';
+            }
             e.units = 'mg/dL';
             e.value = record.sgv ? Number(record.sgv) : Number(record.mbg);
             if (record.delta) { e.delta = record.delta; }
@@ -164,24 +167,25 @@ export class NightscoutDataProcessor extends DataFormatConverter {
 
    // Convert records to intermediate format
    importRecords(input, options) {
-
+      this.logger.info('IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       let r = [];
       const conversionFunction = this.convertNSRecordToIntermediate;
       input.forEach(function (e) {
          r.push(conversionFunction(e, options));
       });
-
+      this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    };
 
    // Convert records to intermediate format
    exportRecords(input, options) {
-
+      this.logger.info('EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       let r = [];
       const conversionFunction = this.convertIntermediateToNS;
       input.forEach(function (e) {
          r.push(conversionFunction(e, options));
       });
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(r));
       return r;
    };
 

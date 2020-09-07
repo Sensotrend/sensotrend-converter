@@ -53,6 +53,10 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(tidepool_sample, options);
 
+      records[0].effectiveDateTime.should.equal("2019-01-26T20:49:35.000+02:00");
+      records[0].resourceType.should.equal("MedicationAdministration");
+      console.log('Got FHIR resource', records[0]);
+
       options = {
          source: 'fiphr',
          target: 'tidepool',
@@ -64,8 +68,79 @@ describe('Data conversion service', function () {
       records2[0].normal.should.equal(0.1);
       records2[0].deviceId.should.equal("MedT-554-450960");
       records2[0].time.should.equal("2019-01-26T18:49:35.000Z");
+      records2[0].type.should.equal("bolus");
+      // records2[0].subtype.should.equal("normal");
 
    });
+
+   it('should convert Tidepool bolus wizard record to FIPHR and back', async function () {
+
+      let tidepool_sample = [{
+         "time": "2019-02-22T16:43:53.000Z",
+         "timezoneOffset": 180,
+         "clockDriftOffset": -2000,
+         "conversionOffset": -518761000,
+         "deviceTime": "2019-02-16T19:37:52",
+         "deviceId": "MMT-1711:NG1112288H",
+         "type": "wizard",
+         "recommended": {
+            "carb": 0.4,
+            "correction": 0,
+            "net": 0.4
+         },
+         "carbInput": 5,
+         "insulinOnBoard": 0,
+         "insulinCarbRatio": 12,
+         "insulinSensitivity": 2.3,
+         "bgTarget": {
+            "low": 5.7,
+            "high": 5.7
+         },
+         "bolus": {
+            "time": "2019-02-22T16:43:56.000Z",
+            "timezoneOffset": 180,
+            "clockDriftOffset": -2000,
+            "conversionOffset": -518761000,
+            "deviceTime": "2019-02-16T19:37:55",
+            "deviceId": "MMT-1711:NG1112288H",
+            "type": "bolus",
+            "subType": "normal",
+            "normal": 0.4,
+            "payload": {
+               "logIndices": [2185299645]
+            }
+         },
+         "units": "mmol/L",
+         "payload": {
+            "logIndices": [2185299642]
+         },
+         "carbUnits": "grams"
+      }];
+
+      let options = {
+         source: 'tidepool',
+         target: 'fiphr',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records = await DataConverter.convert(tidepool_sample, options);
+
+      console.log('Intermediate wizard entry', records);
+
+      options = {
+         source: 'fiphr',
+         target: 'tidepool',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+      let records2 = await DataConverter.convert(records, options);
+
+      records2[0].type.should.equal("wizard");
+      records2[0].deviceId.should.equal("MMT-1711:NG1112288H");
+      records2[0].time.should.equal("2019-02-22T16:43:53.000Z");
+
+   });
+
 
    it('should skip old records when requested', async function () {
 
@@ -115,7 +190,7 @@ describe('Data conversion service', function () {
    });
 
 
-   it('know record formats and time', async function () {
+   it('should know record formats and time', async function () {
 
       let tidepool_sample = [{
             "time": "2017-01-26T18:49:35.000Z",
@@ -140,10 +215,13 @@ describe('Data conversion service', function () {
       };
 
       let records = await DataConverter.convert(tidepool_sample, options);
-      const r = records[0];
-      DataConverter.getRecordFormat(r).should.equal('fiphr');
-      DataConverter.getRecordSourceFormat(r).should.equal('tidepool');
-      DataConverter.getRecordTime(r).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
+      const r1 = records[0];
+      DataConverter.getRecordFormat(r1).should.equal('fiphr');
+      DataConverter.getRecordSourceFormat(r1).should.equal('tidepool');
+      DataConverter.getRecordTime(r1).getTime().should.equal(new Date(tidepool_sample[0].time).getTime());
+
+      r1.effectiveDateTime.should.equal('2017-01-26T20:49:35.000+02:00');
+
    });
 
    it('should convert Nightscout CGM record to FIPHR and back', async function () {
@@ -184,7 +262,7 @@ describe('Data conversion service', function () {
 
       records2[0].sgv.should.equal(177);
       records2[0].type.should.equal("sgv");
-      records2[0].delta.should.equal(15);
+      // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
       records2[0].date.should.equal(ns_sample[0].date);
@@ -227,7 +305,7 @@ describe('Data conversion service', function () {
 
       records2[0].sgv.should.equal(177);
       records2[0].type.should.equal("sgv");
-      records2[0].delta.should.equal(15);
+      // records2[0].delta.should.equal(15);
       // records2[0].direction.should.equal('FortyFiveUp');
       // records2[0].noise.should.equal(1);
       records2[0].date.should.equal(ns_sample[0].date);
@@ -314,7 +392,7 @@ describe('Data conversion service', function () {
    });
 
 
-   it('should convert FIPHR data to Tidepool and back', async function () {
+   it('should convert FIPHR carb data to Tidepool and back', async function () {
 
       let FHIRCarbEntry = {
          "resourceType": "Observation",
@@ -375,8 +453,6 @@ describe('Data conversion service', function () {
 
       let records = await DataConverter.convert(FHIRCarbEntry, options);
 
-      console.log('FHIR TO TIDE', records);
-
       options = {
          source: 'tidepool',
          target: 'fiphr',
@@ -385,11 +461,41 @@ describe('Data conversion service', function () {
 
       let records2 = await DataConverter.convert(records, options);
 
-      console.log('TIDE TO FHIR', records2);
-
       records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
       records2[0].effectiveDateTime.should.equal(FHIRCarbEntry.effectiveDateTime);
       records2[0].code.coding[0].code.should.equal("9059-7");
+
+   });
+
+   it('should convert Libre scan data from Tidepool to a CGM entry', async function () {
+
+      const tidepoolLibreScanEntry = {
+         "time": "2018-01-09T21:42:10.000Z",
+         "timezoneOffset": -60,
+         "clockDriftOffset": -638000,
+         "conversionOffset": 0,
+         "deviceTime": "2018-01-09T20:42:10",
+         "deviceId": "AbbottFreeStyleLibre-JCMX144-K3442",
+         "type": "smbg",
+         "value": 161,
+         "units": "mg/dL",
+         "subType": "scanned",
+         "payload": {
+            "logIndices": [8066]
+         }
+      };
+
+      const options = {
+         source: 'tidepool',
+         target: 'fiphr',
+         FHIR_userid: '756cbc1a-550c-11e9-ada1-177bad63e16d' // Needed for FHIR conversion
+      };
+
+
+      const records = await DataConverter.convert(tidepoolLibreScanEntry, options);
+
+      records[0].code.coding[0].code.should.equal("14745-4");
+      records[0].effectiveDateTime.should.equal('2018-01-09T20:42:10.000-01:00');
 
    });
 

@@ -107,30 +107,29 @@ export class FIPHRDataProcessor extends DataFormatConverter {
          var template = await this.loadTemplate('export_' + type + code);
 
          if (!template) {
-            this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');
+            this.logger.error('ALERT! FHIR resource type ' + sourceData.type + ' not handled');
+            this.logger.debug(JSON.stringify(sourceData));
             return;
          }
          let data = this.enrichFHIRObject(sourceData);
-
          return ST.transform(template, data);
       } catch (error) {
-         this.logger.info('Problem converting data on context: ' + context + ' ' + JSON.stringify(sourceData, null, 2) + ' ' + error);
+         this.logger.info('Problem converting data on context: ' + context + ' ' + JSON.stringify(sourceData, null, 2) + ' ' + JSON.stringify(error));
       }
    }
 
    // Convert records to intermediate format
    async importRecords(input, options) {
-
+      this.logger.info('IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       const data = input.constructor == Array ? input : [input];
-
       let convertedRecords = await Promise.all(data.map(async (record) => {
          let r = record;
          if (r.resource) r = r.resource;
          return this._convertRecordFromFHIR(r, options);
       }));
-
-      return convertedRecords.filter(Boolean);
-
+      const filtered = convertedRecords.filter(Boolean);
+      this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      return filtered;
    };
 
    // Enrich the object with data needed by the templates
@@ -204,12 +203,14 @@ export class FIPHRDataProcessor extends DataFormatConverter {
 
       if (!sourceData.type || !sourceData.time || !sourceData.deviceId) {
          this.logger.error('ALERT! Record type, time or device missing, cannot convert data');
+         this.logger.debug(JSON.stringify(sourceData));
          return;
       }
 
       var template = await this.loadTemplate('import_' + sourceData.type);
       if (!template) {
          this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');
+         this.logger.debug(JSON.stringify(sourceData));
          return;
       }
       let data = this.enrichObject(sourceData, patientReference);
@@ -218,31 +219,29 @@ export class FIPHRDataProcessor extends DataFormatConverter {
 
    // Convert records to FHIR format
    async exportRecords(input, options) {
-
+      this.logger.info('EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options));
       if (!options.FHIR_userid) {
          this.logger.info('options.FHIR_userid needed for FHIR exporting');
          return false;
       }
-
       const data = input.constructor == Array ? input : [input];
-
       var d = [];
-
       data.map((record) => {
          if (record.type == 'wizard') {
             if (record.carbInput) {
                let entry = _.cloneDeep(record);
-               entry.type = "carbs";
+               entry.type = 'carbs';
                d.push(entry);
             }
             if (record.normal) {
                let entry = _.cloneDeep(record);
-               entry.type = "bolus";
+               entry.type = 'bolus';
                d.push(entry);
             }
             if (record.bolus) {
                if (record.bolus.type) {
                   let entry = _.cloneDeep(record.bolus);
+                  entry._converter = record._converter;
                   d.push(entry);
                }
             }
@@ -250,11 +249,11 @@ export class FIPHRDataProcessor extends DataFormatConverter {
             d.push(record);
          }
       });
-
       let convertedRecords = await Promise.all(d.map(async (record) => {
          return this.convertRecord(record, options.FHIR_userid);
       }));
-
-      return convertedRecords.filter(Boolean);
+      const filtered = convertedRecords.filter(Boolean);
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      return filtered;
    };
 }
