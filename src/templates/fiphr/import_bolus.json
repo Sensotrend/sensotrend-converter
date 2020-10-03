@@ -42,9 +42,9 @@
     "text": "Lyhytvaikutteinen insuliini, {{insulin}} yksikköä",
      "dose": {
       "value": "{{insulin}}",
-      "unit": "iU",
+      "unit": "IU",
       "system": "http://unitsofmeasure.org",
-      "code": "iU"
+      "code": "IU"
     }
   }
 }
