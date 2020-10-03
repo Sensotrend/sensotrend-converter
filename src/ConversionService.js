@@ -95,6 +95,7 @@ export class ConversionService {
     * @param {DateFilter} [options.skipRecordsUsingDates] Filtering instructions for skipping some records
     */
    async convert(sourceData, options) {
+      this.logger.debug('Converting data using options: ' + JSON.stringify(options || {}));
 
       let i = await this.importRecords(sourceData, options);
 
