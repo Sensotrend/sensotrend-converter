@@ -2,6 +2,8 @@ import path from 'path';
 import fs from 'fs-extra';
 import NodeCache from 'node-cache';
 
+const __dirname = path.resolve();
+
 /**
  * Deep freeze an object
  * @param {Object} o Object to be deepfrozen
