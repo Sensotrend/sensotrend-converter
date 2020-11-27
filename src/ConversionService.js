@@ -1,4 +1,5 @@
-import {version} from '../package.json';
+import packageModule from '../package.json';
+const { version } = packageModule;
 /**
  * Data converter module
  */
