@@ -6,7 +6,7 @@ import _ from 'lodash';
 import uuidModule from 'uuid';
 import { DataFormatConverter} from '../../DataFormatConverter.js';
 
-const {v5: uuidv5 } = uuidModule;
+const uuidv5 = uuidModule.v5;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
