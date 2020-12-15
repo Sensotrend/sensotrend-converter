@@ -1,6 +1,11 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
+
 import fs from 'fs-extra';
 import NodeCache from 'node-cache';
+
+const { dirname } = path;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Deep freeze an object
