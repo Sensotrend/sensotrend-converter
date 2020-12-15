@@ -1,3 +1,4 @@
+import path from 'path';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
@@ -5,6 +6,8 @@ import uuidModule from 'uuid';
 import { DataFormatConverter} from '../../DataFormatConverter.js';
 
 const {v5: uuidv5 } = uuidModule;
+
+const __dirname = path.resolve();
 
 const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
