@@ -1,8 +1,13 @@
+import path from 'path';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
-import uuidv5 from 'uuid/v5';
-import { DataFormatConverter} from '../../DataFormatConverter';
+import v5 from 'uuid';
+import DataFormatConverter from '../../DataFormatConverter.mjs';
+
+const uuidv5 = v5;
+
+const __dirname = path.resolve(); 
 
 const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
@@ -29,7 +34,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
    };
 
    templatePath() {
-      return __dirname;
+      return  path.resolve(__dirname,'src','templates','fiphr');
    }
 
    enrichFHIRObject(sourceData) {

@@ -1,4 +1,4 @@
-import { DataFormatConverter } from '../../DataFormatConverter';
+import  DataFormatConverter  from '../../DataFormatConverter.mjs';
 
 const converterName = process.env.CONVERTER_NAME || 'Sensotrend Connect';
 

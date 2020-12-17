@@ -1,9 +1,9 @@
-import _ConversionService from './ConversionService';
-import { NightscoutDataProcessor } from './templates/nightscout';
-import { FIPHRDataProcessor } from './templates/fiphr';
-import { TidepoolDataProcessor } from './templates/tidepool';
+import _ConversionService from './ConversionService.mjs';
+import { NightscoutDataProcessor } from './templates/nightscout/index.mjs';
+import { FIPHRDataProcessor } from './templates/fiphr/index.mjs';
+import { TidepoolDataProcessor } from './templates/tidepool/index.mjs';
 
-const __ConversionService = _ConversionService.ConversionService;
+const __ConversionService = _ConversionService;
 
 export {__ConversionService as ConversionService};
 

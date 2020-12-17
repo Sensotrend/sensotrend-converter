@@ -1,4 +1,5 @@
-import {version} from '../package.json';
+const version = process.env.npm_package_version;
+
 /**
  * Data converter module
  */

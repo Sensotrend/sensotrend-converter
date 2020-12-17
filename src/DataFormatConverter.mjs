@@ -2,6 +2,8 @@ import path from 'path';
 import fs from 'fs-extra';
 import NodeCache from 'node-cache';
 
+const __dirname = path.resolve(); 
+
 /**
  * Deep freeze an object
  * @param {Object} o Object to be deepfrozen
@@ -24,7 +26,7 @@ function deepFreeze (o) {
 /**
  * Converter class that supports some specific data format
  */
-export class DataFormatConverter {
+export default class DataFormatConverter {
     /**
      * Logger class for the converter. If provided, the logger must provide the following
      * functions.
@@ -81,7 +83,7 @@ export class DataFormatConverter {
      * template files as a result (possibly __dirname)
      */
     templatePath() {
-        return this.templateDirectory;
+        return path.resolve(this.templateDirectory,'tests'); 
     }
 
     /**
@@ -102,7 +104,7 @@ export class DataFormatConverter {
 
         try {
             const result = await fs.stat(filePath); // will fail if file does not exist
-            if (await fs.exists(filePath)) {
+            if (await fs.pathExists(filePath)) {
                 template = await fs.readFile(filePath, 'utf8');
             }
         } catch (error) {
