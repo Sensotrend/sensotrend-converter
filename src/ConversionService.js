@@ -2,7 +2,7 @@ import {version} from '../package.json';
 /**
  * Data converter module
  */
-export class ConversionService {
+export default class ConversionService {
 
    #__sourceFormat;
    #__format;

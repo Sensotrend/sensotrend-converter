@@ -1,4 +1,4 @@
-import * as _ConversionService from './ConversionService';
+import _ConversionService from './ConversionService';
 import { NightscoutDataProcessor } from './templates/nightscout';
 import { FIPHRDataProcessor } from './templates/fiphr';
 import { TidepoolDataProcessor } from './templates/tidepool';
