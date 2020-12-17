@@ -1,17 +1,17 @@
-import {
-   ConversionService
-} from '../src/ConversionService';
+import ConversionService from '../src/ConversionService.mjs';
 import {
    NightscoutDataProcessor
-} from '../src/templates/nightscout';
+} from '../src/templates/nightscout/index.mjs';
 import {
    FIPHRDataProcessor
-} from '../src/templates/fiphr';
+} from '../src/templates/fiphr/index.mjs';
 import {
    TidepoolDataProcessor
-} from '../src/templates/tidepool';
+} from '../src/templates/tidepool/index.mjs';
 
-import should from 'should';
+import shouldModule  from 'should';
+
+const {should} = shouldModule;
 
 const logger = {};
 logger.info = console.log;
@@ -340,10 +340,10 @@ describe('Data conversion service', function () {
       };
 
       let records2 = await DataConverter.convert(records, options);
-
-      should.not.exist(records2[0].delta);
-      should.not.exist(records2[0].direction);
-      should.not.exist(records2[0].noise);
+  
+      records2[0].should.not.have.property('delta');
+      records2[0].should.not.have.property('direction');
+      records2[0].should.not.have.property('noise');
    });
 
    it('should convert Nightscout bolus wizard record to FIPHR and back', async function () {

@@ -1,21 +1,21 @@
-import {
-    ConversionService
-} from '../src/ConversionService';
+import ConversionService from '../src/ConversionService.mjs';
 import {
     NightscoutDataProcessor
-} from '../src/templates/nightscout';
+} from '../src/templates/nightscout/index.mjs';
 import {
     FIPHRDataProcessor
-} from '../src/templates/fiphr';
+} from '../src/templates/fiphr/index.mjs';
 import {
     TidepoolDataProcessor
-} from '../src/templates/tidepool';
+} from '../src/templates/tidepool/index.mjs';
 
-import { DataFormatConverter } from '../src/DataFormatConverter';
+import DataFormatConverter from '../src/DataFormatConverter.mjs';
 
 const abstractConverter = new DataFormatConverter();
 
-import should from 'should';
+import shouldModule from 'should';
+
+const {should} = shouldModule;
 
 const logger = {};
 logger.info = console.log;
@@ -37,8 +37,8 @@ describe('Data conversion', function () {
             target: 'fiphr',
             FHIR_userid: 'abc'
         };
-
-        should(DataConverter.convert(data, options)).be.rejected(); 
+        DataConverter.convert(data,options).should.be.rejected();
+        //should(DataConverter.convert(data, options)).be.rejected(); 
     });
 
 
@@ -50,7 +50,8 @@ describe('Data conversion', function () {
             FHIR_userid: 'abc'
         };
 
-        should(DataConverter.convert(data, options)).be.rejected(); 
+        DataConverter.convert(data,options).should.be.rejected();
+        //should(DataConverter.convert(data, options)).be.rejected(); 
     });
 
     it('should fail when source format converter is missing', async function () {
@@ -62,7 +63,8 @@ describe('Data conversion', function () {
             FHIR_userid: 'abc'
         };
 
-        should(DataConverter.importRecords(data, options)).be.rejected(); 
+        DataConverter.importRecords(data,options).should.be.rejected();
+        //should(DataConverter.importRecords(data, options)).be.rejected(); 
     });
 
     it('should fail when target format converter is missing', async function () {
@@ -73,8 +75,8 @@ describe('Data conversion', function () {
             target: 'nonexistingformat',
             FHIR_userid: 'abc'
         };
-
-        should(DataConverter.exportRecords(data, options)).be.rejected();
+        DataConverter.exportRecords(data,options).should.be.rejected();
+        //should(DataConverter.exportRecords(data, options)).be.rejected();
     });
 
     it('should fail when asking for date an object not sourced from the converter', async function () {

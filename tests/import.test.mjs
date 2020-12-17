@@ -1,4 +1,4 @@
-import { ConversionService, DefaultConversionService } from '../src/index.js';
+import { ConversionService, DefaultConversionService } from '../src/index.mjs';
 
 console.log(ConversionService);
 

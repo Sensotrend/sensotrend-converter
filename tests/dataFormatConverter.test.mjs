@@ -1,5 +1,10 @@
-import should from 'should';
-import { DataFormatConverter } from '../src/DataFormatConverter';
+import path from 'path';
+import shouldModule from 'should';
+import DataFormatConverter from '../src/DataFormatConverter.mjs';
+
+const {should} = shouldModule;
+
+const __dirname = path.resolve(); 
 
 const logger = {};
 logger.info = console.log;
