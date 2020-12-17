@@ -2,7 +2,7 @@ import path from 'path';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
-import v5 from 'uuid';
+import {v5} from 'uuid';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 const uuidv5 = v5;

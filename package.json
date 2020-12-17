@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.9-beta",
+  "version": "1.0.10-beta",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
@@ -38,7 +38,7 @@
     "cache": false
   },
   "engines": {
-    "node": "^12.2.0",
+    "node": "^12.19.0",
     "npm": "6.x"
   },
   "scripts": {
@@ -48,6 +48,6 @@
     "coverage-html": "rm -rf .nyc_output && npm run-script coverage && nyc report --reporter html && nyc report --reporter text-lcov > coverage/codecov.log"
   },
   "jshintConfig": {
-    "esversion": 8
+    "esversion": 9
   }
 }
