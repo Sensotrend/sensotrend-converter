@@ -1,10 +1,11 @@
-import path from 'path';
+import {dirname} from 'path';
+import { fileURLToPath } from 'url';
 import shouldModule from 'should';
 import DataFormatConverter from '../src/DataFormatConverter.mjs';
 
 const {should} = shouldModule;
 
-const __dirname = path.resolve(); 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const logger = {};
 logger.info = console.log;

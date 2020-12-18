@@ -1,13 +1,14 @@
-import path from 'path';
+import path, {dirname} from 'path'
+import { fileURLToPath } from 'url';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
 import {v5} from 'uuid';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
-const uuidv5 = v5;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const __dirname = path.resolve(); 
+const uuidv5 = v5;
 
 const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
@@ -34,7 +35,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
    };
 
    templatePath() {
-      return  path.resolve(__dirname,'src','templates','fiphr');
+      return  path.resolve(__dirname);
    }
 
    enrichFHIRObject(sourceData) {
