@@ -1,13 +1,14 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.12-beta",
+  "version": "1.0.14-beta",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
     "Nightscout",
     "Tidepool",
     "HL7",
-    "Sensotrend"
+    "Sensotrend",
+    "LibreCsv"
   ],
   "license": "BSD-2-Clause",
   "description": "Data format converter for managing various JSON data formats related to type 1 diabetes",

@@ -1,0 +1,48 @@
+{
+  "resourceType": "MedicationAdministration",
+  "meta": {
+    "profile": ["http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3"]
+  },
+  "language": "fi",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Koodi: Pitkävaikutteinen insuliini (ins-short-fast)<br />Aika: {{formattedDate}}<br />Annos: {{insulin}} IU<br />Laite: {{deviceId}} (via {{_converter}})</div>"
+  },
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:{{guid}}"
+    }
+  ],
+  "status": "completed",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode",
+        "code": "ins-intermediate-long",
+        "display": "Pitkävaikutteinen insuliini"
+      }
+    ],
+    "text": "Pitkävaikutteinen insuliini"
+  },
+  "subject": {
+    "reference": "Patient/{{patientId}}"
+  },
+  "effectiveDateTime": "{{time_fhir}}",
+  "performer": [
+    {
+      "actor": {
+        "reference": "Patient/{{patientId}}"
+      }
+    }
+  ],
+  "dosage": {
+    "text": "Pitkävaikutteinen insuliini, {{insulin}} yksikköä",
+    "dose": {
+      "value": "{{insulin}}",
+      "unit": "IU",
+      "system": "http://unitsofmeasure.org",
+      "code": "IU"
+    }
+  }
+}
