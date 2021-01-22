@@ -1,9 +1,12 @@
+/* eslint-disable no-case-declarations */
+import os from 'os';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
 import { v5 } from 'uuid';
+import WorkerPool from '../../tools/worker_pool.mjs';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -13,6 +16,8 @@ const uuidv5 = v5;
 const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
 const descriptionIllegalStrings = [' (via Sensotrend Connect)', ' (via Nightscout Connect)'];
+
+const pool = new WorkerPool(os.cpus().length);
 
 /**
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
@@ -233,7 +238,35 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       return;
     }
     let data = this.enrichObject(sourceData, patientReference);
+
     return ST.transform(template, data);
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  *splitCsvDataToSmallGroups(csvArr) {
+    //}, FHIR_userid) {
+    const step = 5000;
+
+    while (true) {
+      let csvSmallGroup = csvArr.splice(0, step);
+
+      if (csvSmallGroup.length === 0) {
+        return [];
+      }
+
+      yield csvSmallGroup;
+
+      //let promiseGroup = await Promise.all(
+      //  csvSmallGroup.map(async (record) => {
+      //    return this.convertRecord(record, FHIR_userid);
+      //  })
+      //);
+
+      // yield promiseGroup.filter(Boolean);
+    }
   }
 
   // Convert records to FHIR format
@@ -275,13 +308,35 @@ export class FIPHRDataProcessor extends DataFormatConverter {
         d.push(record);
       }
     });
-    let convertedRecords = await Promise.all(
-      d.map(async (record) => {
-        return this.convertRecord(record, options.FHIR_userid);
-      })
-    );
-    const filtered = convertedRecords.filter(Boolean);
-    this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
-    return filtered;
+    // eslint-disable-next-line no-prototype-builtins
+    if (!options.hasOwnProperty('csvGenerator')) {
+      let convertedRecords = await Promise.all(
+        d.map(async (record) => {
+          return this.convertRecord(record, options.FHIR_userid);
+        })
+      );
+      const filtered = convertedRecords.filter(Boolean);
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      return filtered;
+    } else {
+      let convertedRecords = [];
+
+      for (let splitRecord of this.splitCsvDataToSmallGroups(d.slice(0, 1))) {
+        convertedRecords.push(
+          //await Promise.all(
+          splitRecord.map(async (record) => {
+            return this.convertRecord(record, options.FHIR_userid);
+          })
+          // )
+        );
+      }
+
+      //for await (let splitRecord of this.splitCsvDataToSmallGroups(d, options.FHIR_userid)) {
+      //  convertedRecords.push(splitRecord);
+      // }
+
+      //const filtered = converted.filter(Boolean);
+      return convertedRecords;
+    }
   }
 }

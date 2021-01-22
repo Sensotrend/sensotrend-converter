@@ -1,3 +1,7 @@
+/* eslint-disable no-unused-vars */
+
+import moment from 'moment';
+
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 export class LibreCsvDataProcessor extends DataFormatConverter {
@@ -6,7 +10,7 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
   }
 
   convertRecordToIntermediate(r, options) {
-    data = {
+    const data = {
       time: '',
       timezoneOffset: '',
       type: '',
@@ -19,34 +23,35 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
 
     const device = Object.create(data);
     const devices = [];
+    moment.defaultFormat = 'DD.MM.YYYY HH:mm';
 
     switch (r.record_type) {
       case '0': //History of glucose measurement
-        device.type = 'sgv';
+        device.type = 'cbg';
         device.scanOrHistoricInfo = 'historic';
-        device.time = r.device_timestamp;
-        device.timezoneOffset = '';
+        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        device.timezoneOffset = moment().utcOffset();
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = r.historic_glucose_mmol_l;
+        device.value = parseFloat(r.historic_glucose_mmol_l.replace(/["]/g, ''));
         device.units = 'mmol/l';
         devices.push(device);
         break;
       case '1': //Read glucose measurement
-        device.type = 'sgv';
+        device.type = 'cbg';
         device.measurementReadOrHistoryInfo = 'scan';
-        device.time = r.device_timestamp;
-        device.timezoneOffset = '';
+        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        device.timezoneOffset = moment().utcOffset();
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = r.scan_glucose_mmol_l;
+        device.value = parseFloat(r.scan_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'mmol/l';
         devices.push(device);
         break;
       case '2': //Measurement tape (Diabetes)
         device.type = 'smbg';
-        device.time = r.device_timestamp;
-        device.timezoneOffset = '';
+        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        device.timezoneOffset = moment().utcOffset();
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = r.strip_glucose_mmol_l;
+        device.value = parseFloat(r.strip_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'mmol/l';
         devices.push(device);
         break;
@@ -54,10 +59,12 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         if (r.rapid_acting_insulin_units != '') {
           const deviceRapid = Object.create(data);
           deviceRapid.type = 'bolus';
-          deviceRapid.time = r.device_timestamp;
-          deviceRapid.timezoneOffset = '';
+          deviceRapid.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          deviceRapid.timezoneOffset = moment().utcOffset();
           deviceRapid.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceRapid.value = r.rapid_acting_insulin_units;
+          deviceRapid.value = parseFloat(
+            r.rapid_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
+          );
           deviceRapid.units = 'IU';
 
           devices.push(deviceRapid);
@@ -65,10 +72,12 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         if (r.long_acting_insulin_units != '') {
           const deviceLong = Object.create(data);
           deviceLong.type = 'long';
-          deviceLong.time = r.device_timestamp;
-          deviceLong.timezoneOffset = '';
+          deviceLong.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          deviceLong.timezoneOffset = moment().utcOffset();
           deviceLong.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceLong.value = r.long_acting_insulin_units;
+          deviceLong.value = parseFloat(
+            r.long_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
+          );
           deviceLong.units = 'IU';
 
           devices.push(deviceLong);
@@ -77,10 +86,10 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
       case '5': //Carbohydrates
         device.type = 'carbs';
         device.measurementReadOrHistoryInfo = 'scan';
-        device.time = r.device_timestamp;
-        device.timezoneOffset = '';
+        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        device.timezoneOffset = moment().utcOffset();
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = r.carbohydrates_grams;
+        device.value = parseFloat(r.carbohydrates_grams.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'g';
         devices.push(device);
         break;

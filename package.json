@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.14-beta",
+  "version": "1.0.15-beta",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
@@ -14,11 +14,12 @@
   "description": "Data format converter for managing various JSON data formats related to type 1 diabetes",
   "repository": "https://github.com/sensotrend/sensotrend-converter",
   "dependencies": {
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "moment": "^2.29.1",
-    "node-cache": "^5.1.0",
+    "node-cache": "^5.1.2",
     "stjs": "0.0.5",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.3.3"
   },
   "type": "module",
   "devDependencies": {
@@ -28,9 +29,18 @@
     "minami": "^1.2.3",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
-    "should": "^13.2.3",
     "source-map-support": "^0.5.19",
-    "supertest": "^6.0.1"
+    "supertest": "^6.1.1",
+    "unzipper": "^0.10.11",
+    "@babel/core": "^7.12.10",
+    "@babel/eslint-parser": "^7.12.1",
+    "@babel/eslint-plugin": "^7.12.1",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-private-methods": "^7.12.1",
+    "@babel/preset-env": "^7.12.11",
+    "chai": "^4.2.0",
+    "eslint": "^7.18.0",
+    "eslint-config-prettier": "^7.2.0"
   },
   "nyc": {
     "all": false,
@@ -45,6 +55,7 @@
   "scripts": {
     "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
     "test": "mocha --exit --timeout 8000 tests/*.test.mjs",
+    "test2": "mocha --exit --timeout 74000 tests/librecsv.test.mjs",
     "coverage": "nyc mocha --exit --timeout 8000 tests/*.test.mjs",
     "coverage-html": "rm -rf .nyc_output && npm run-script coverage && nyc report --reporter html && nyc report --reporter text-lcov > coverage/codecov.log"
   },

@@ -2,7 +2,7 @@ import _ConversionService from './ConversionService.mjs';
 import { NightscoutDataProcessor } from './templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from './templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from './templates/tidepool/index.mjs';
-import { LibreCsvDataProcessor } from './templates/librecsv.mjs';
+import { LibreCsvDataProcessor } from './templates/librecsv/index.mjs';
 
 const __ConversionService = _ConversionService;
 
@@ -19,7 +19,7 @@ export { __ConversionService as ConversionService };
  */
 
 /**
- * Instantiate the data converted with the detaulf converters supplied with the
+ * Instantiate the data converted with the default converters supplied with the
  * library.
  *
  * @param {Logger} [logger] Used for logging. If not supplied, logging is output to the Javascript console
