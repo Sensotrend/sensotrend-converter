@@ -242,26 +242,6 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     return ST.transform(template, data);
   }
 
-  sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  *splitCsvDataToSmallGroups(csvArr, FHIR_userid) {
-    const records = csvArr.map(async (record) => {
-      return this.convertRecord(record, FHIR_userid);
-    });
-
-    yield records;
-
-    //let promiseGroup = await Promise.all(
-    //  csvSmallGroup.map(async (record) => {
-    //    return this.convertRecord(record, FHIR_userid);
-    //  })
-    //);
-
-    // yield promiseGroup.filter(Boolean);
-  }
-
   // Convert records to FHIR format
   async exportRecords(input, options) {
     this.logger.info(
@@ -312,24 +292,14 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
       return filtered;
     } else {
-      let convertedRecords = [];
-
-      for (let splitRecord of this.splitCsvDataToSmallGroups(d, options.FHIR_userid)) {
-        convertedRecords.push(
-          await Promise.all(splitRecord)
-          //splitRecord.map(async (record) => {
-          //  return this.convertRecord(record, options.FHIR_userid);
-          //})
-          //)
-        );
-      }
-
-      //for await (let splitRecord of this.splitCsvDataToSmallGroups(d, options.FHIR_userid)) {
-      //  convertedRecords.push(splitRecord);
-      // }
-
-      //const filtered = converted.filter(Boolean);
-      return convertedRecords;
+      let convertedRecords = await Promise.all(
+        d.map(async (record) => {
+          return this.convertRecord(record, options.FHIR_userid);
+        })
+      );
+      const filtered = convertedRecords.filter(Boolean);
+      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      return filtered;
     }
   }
 }

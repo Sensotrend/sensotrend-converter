@@ -44,11 +44,12 @@ describe('Convert libreCsv to fiphr ', function () {
     await openCsvTestFile();
   });
 
-  it('Start first test', async () => {
+  it('Start first test', async (done) => {
     const payloads = JSON.parse(data);
 
     const records = await DataFormatConverter.convert(payloads, options);
 
     console.log(records);
+    done();
   });
 });
