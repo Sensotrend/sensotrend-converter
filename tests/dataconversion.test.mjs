@@ -2,7 +2,7 @@ import ConversionService from '../src/ConversionService.mjs';
 import { NightscoutDataProcessor } from '../src/templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from '../src/templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from '../src/templates/tidepool/index.mjs';
-import 'chai/register-should';
+import 'chai/register-should.js';
 
 const logger = {};
 logger.info = console.log;
