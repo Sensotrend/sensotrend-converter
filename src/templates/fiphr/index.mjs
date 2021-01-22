@@ -246,27 +246,20 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  *splitCsvDataToSmallGroups(csvArr) {
-    //}, FHIR_userid) {
-    const step = 5000;
+  *splitCsvDataToSmallGroups(csvArr, FHIR_userid) {
+    const records = csvArr.map(async (record) => {
+      return this.convertRecord(record, FHIR_userid);
+    });
 
-    while (true) {
-      let csvSmallGroup = csvArr.splice(0, step);
+    yield records;
 
-      if (csvSmallGroup.length === 0) {
-        return [];
-      }
+    //let promiseGroup = await Promise.all(
+    //  csvSmallGroup.map(async (record) => {
+    //    return this.convertRecord(record, FHIR_userid);
+    //  })
+    //);
 
-      yield csvSmallGroup;
-
-      //let promiseGroup = await Promise.all(
-      //  csvSmallGroup.map(async (record) => {
-      //    return this.convertRecord(record, FHIR_userid);
-      //  })
-      //);
-
-      // yield promiseGroup.filter(Boolean);
-    }
+    // yield promiseGroup.filter(Boolean);
   }
 
   // Convert records to FHIR format
@@ -321,13 +314,13 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     } else {
       let convertedRecords = [];
 
-      for (let splitRecord of this.splitCsvDataToSmallGroups(d.slice(0, 1))) {
+      for (let splitRecord of this.splitCsvDataToSmallGroups(d, options.FHIR_userid)) {
         convertedRecords.push(
-          //await Promise.all(
-          splitRecord.map(async (record) => {
-            return this.convertRecord(record, options.FHIR_userid);
-          })
-          // )
+          await Promise.all(splitRecord)
+          //splitRecord.map(async (record) => {
+          //  return this.convertRecord(record, options.FHIR_userid);
+          //})
+          //)
         );
       }
 
