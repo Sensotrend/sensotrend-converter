@@ -18,12 +18,13 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
       normal: '',
       value: '',
       units: '',
+      _converter: 'Sensotrend Connect',
       scanOrHistoricInfo: '',
     };
 
     const device = Object.create(data);
     const devices = [];
-    moment.defaultFormat = 'DD.MM.YYYY HH:mm';
+    moment.defaultFormat = 'MM-DD-YYYY HH:mm';
 
     switch (r.record_type) {
       case '0': //History of glucose measurement

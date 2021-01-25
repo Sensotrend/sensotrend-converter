@@ -1,12 +1,10 @@
 /* eslint-disable no-case-declarations */
-import os from 'os';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import moment from 'moment';
 import ST from 'stjs';
 import _ from 'lodash';
 import { v5 } from 'uuid';
-import WorkerPool from '../../tools/worker_pool.mjs';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -16,8 +14,6 @@ const uuidv5 = v5;
 const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
 const descriptionIllegalStrings = [' (via Sensotrend Connect)', ' (via Nightscout Connect)'];
-
-const pool = new WorkerPool(os.cpus().length);
 
 /**
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
