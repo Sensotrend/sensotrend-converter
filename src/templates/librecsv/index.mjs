@@ -7,10 +7,8 @@ import DataFormatConverter from '../../DataFormatConverter.mjs';
 export class LibreCsvDataProcessor extends DataFormatConverter {
   constructor(logger) {
     super(logger);
-  }
 
-  convertRecordToIntermediate(r, options) {
-    const data = {
+    this.data = {
       time: '',
       timezoneOffset: '',
       type: '',
@@ -21,82 +19,90 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
       _converter: 'Sensotrend Connect',
       scanOrHistoricInfo: '',
     };
+  }
 
-    const device = Object.create(data);
-    const devices = [];
+  convertRecordToIntermediate(r, options) {
+    this.device = Object.create(this.data);
+    this.devices = [];
     moment.defaultFormat = 'MM-DD-YYYY HH:mm';
 
     switch (r.record_type) {
       case '0': //History of glucose measurement
-        device.type = 'cbg';
-        device.scanOrHistoricInfo = 'historic';
-        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-        device.timezoneOffset = moment().utcOffset();
-        device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = parseFloat(r.historic_glucose_mmol_l.replace(/["]/g, ''));
-        device.units = 'mmol/l';
-        devices.push(device);
+        this.device.type = 'cbg';
+        this.device.scanOrHistoricInfo = 'historic';
+        this.device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        this.device.timezoneOffset = moment().utcOffset();
+        this.device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+        this.device.value = parseFloat(r.historic_glucose_mmol_l.replace(/["]/g, ''));
+        this.device.units = 'mmol/l';
+        this.devices.push(device);
         break;
       case '1': //Read glucose measurement
-        device.type = 'cbg';
-        device.measurementReadOrHistoryInfo = 'scan';
-        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-        device.timezoneOffset = moment().utcOffset();
-        device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = parseFloat(r.scan_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
-        device.units = 'mmol/l';
-        devices.push(device);
+        this.device.type = 'cbg';
+        this.device.measurementReadOrHistoryInfo = 'scan';
+        this.device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        this.device.timezoneOffset = moment().utcOffset();
+        this.device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+        this.device.value = parseFloat(
+          r.scan_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.')
+        );
+        this.device.units = 'mmol/l';
+        this.devices.push(this.device);
         break;
       case '2': //Measurement tape (Diabetes)
-        device.type = 'smbg';
-        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-        device.timezoneOffset = moment().utcOffset();
-        device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = parseFloat(r.strip_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
-        device.units = 'mmol/l';
-        devices.push(device);
+        this.device.type = 'smbg';
+        this.device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        this.device.timezoneOffset = moment().utcOffset();
+        this.device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+        this.device.value = parseFloat(
+          r.strip_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.')
+        );
+        this.device.units = 'mmol/l';
+        this.devices.push(this.device);
         break;
       case '4': //Fast and  long insulin
         if (r.rapid_acting_insulin_units != '') {
-          const deviceRapid = Object.create(data);
-          deviceRapid.type = 'bolus';
-          deviceRapid.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-          deviceRapid.timezoneOffset = moment().utcOffset();
-          deviceRapid.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceRapid.value = parseFloat(
+          this.deviceRapid = Object.create(this.data);
+          this.deviceRapid.type = 'bolus';
+          this.deviceRapid.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          this.deviceRapid.timezoneOffset = moment().utcOffset();
+          this.deviceRapid.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+          this.deviceRapid.value = parseFloat(
             r.rapid_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
           );
-          deviceRapid.units = 'IU';
+          this.deviceRapid.units = 'IU';
 
-          devices.push(deviceRapid);
+          this.devices.push(this.deviceRapid);
         }
         if (r.long_acting_insulin_units != '') {
-          const deviceLong = Object.create(data);
-          deviceLong.type = 'long';
-          deviceLong.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-          deviceLong.timezoneOffset = moment().utcOffset();
-          deviceLong.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceLong.value = parseFloat(
+          this.deviceLong = Object.create(this.data);
+          this.deviceLong.type = 'long';
+          this.deviceLong.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          this.deviceLong.timezoneOffset = moment().utcOffset();
+          this.deviceLong.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+          this.deviceLong.value = parseFloat(
             r.long_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
           );
-          deviceLong.units = 'IU';
+          this.deviceLong.units = 'IU';
 
-          devices.push(deviceLong);
+          this.devices.push(this.deviceLong);
         }
         break;
       case '5': //Carbohydrates
-        device.type = 'carbs';
-        device.measurementReadOrHistoryInfo = 'scan';
-        device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-        device.timezoneOffset = moment().utcOffset();
-        device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-        device.value = parseFloat(r.carbohydrates_grams.replace(/["]/g, '').replace(/[,]/g, '.'));
-        device.units = 'g';
-        devices.push(device);
+        this.device.type = 'carbs';
+        this.device.measurementReadOrHistoryInfo = 'scan';
+        this.device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+        this.device.timezoneOffset = moment().utcOffset();
+        this.device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+        this.device.value = parseFloat(
+          r.carbohydrates_grams.replace(/["]/g, '').replace(/[,]/g, '.')
+        );
+        this.device.units = 'g';
+        this.devices.push(this.device);
         break;
     }
 
-    return devices;
+    return this.devices;
   }
 
   /**
