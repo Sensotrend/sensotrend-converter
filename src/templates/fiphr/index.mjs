@@ -70,6 +70,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
           case 'Muutos':
             const deltaSplit = keyValue[1].split(' ');
             const delta = Number(deltaSplit[0]);
+            // eslint-disable-next-line no-unused-vars
             const units = deltaSplit[1];
             entry._deltammol = delta;
             break;

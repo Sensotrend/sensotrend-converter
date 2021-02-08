@@ -107,9 +107,9 @@ export default class DataFormatConverter {
     let template;
 
     try {
-      const result = await fs.stat(filePath); // will fail if file does not exist
-      if (await fs.pathExists(filePath)) {
-        template = await fs.readFile(filePath, 'utf8');
+      const result = fs.ensureFileSync(filePath); // will fail if file does not exist
+      if (fs.pathExistsSync(filePath)) {
+        template = fs.readFileSync(filePath, 'utf8');
       }
     } catch (error) {
       this.logger.error(

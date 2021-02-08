@@ -49,7 +49,7 @@ describe('Convert libreCsv to fiphr ', function () {
 
   before(async () => {
     try {
-      generator = await openCsvTestFile();
+      generator = openCsvTestFile();
     } catch (err) {
       console.log(err);
     }
