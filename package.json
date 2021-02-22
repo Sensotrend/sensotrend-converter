@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.4-beta",
+  "version": "1.0.5-beta",
   "main": "src/index.js",
   "keywords": [
     "FHIR",
@@ -46,8 +46,8 @@
     ]
   },
   "engines": {
-    "node": "^14.15.5",
-    "npm": "6.x"
+    "node": ">=14.15.5",
+    "npm": ">=7.5.4"
   },
   "scripts": {
     "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
