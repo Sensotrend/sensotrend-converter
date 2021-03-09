@@ -228,7 +228,14 @@ export class FIPHRDataProcessor extends DataFormatConverter {
       return;
     }
 
-    var template = await this.loadTemplate('import_' + sourceData.type);
+    let template;
+    // TODO: It does not make sense to load the templates each time, for each record!
+    // These should be memoized!
+    try {
+      await this.loadTemplate('import_' + sourceData.type);
+    } catch (e) {
+      this.logger.error('ALERT! Unable to load template for ' + sourceData.type + '. ' + JSON.stringify(e));
+    }
     if (!template) {
       this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');
       this.logger.debug(JSON.stringify(sourceData));
