@@ -6,7 +6,7 @@
   "language": "fi",
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Koodi: Pitkävaikutteinen insuliini (ins-short-fast)<br />Aika: {{formattedDate}}<br />Annos: {{insulin}} IU<br />Laite: {{deviceId}} (via {{_converter}})</div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Koodi: Pitkävaikutteinen insuliini (ins-short-fast)<br />Aika: {{formattedDate}}<br />Annos: {{insulin}} iU<br />Laite: {{deviceId}} (via {{_converter}})</div>"
   },
   "identifier": [
     {
@@ -40,9 +40,9 @@
     "text": "Pitkävaikutteinen insuliini, {{insulin}} yksikköä",
     "dose": {
       "value": "{{insulin}}",
-      "unit": "IU",
+      "unit": "iU",
       "system": "http://unitsofmeasure.org",
-      "code": "IU"
+      "code": "iU"
     }
   }
 }
