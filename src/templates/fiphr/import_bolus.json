@@ -1,9 +1,7 @@
 {
   "resourceType": "MedicationAdministration",
   "meta": {
-    "profile": [
-      "http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3"
-    ]
+    "profile": ["http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3"]
   },
   "language": "fi",
   "text": {
@@ -34,17 +32,17 @@
   "performer": [
     {
       "actor": {
-         "reference": "Patient/{{patientId}}"
-	   }
+        "reference": "Patient/{{patientId}}"
+      }
     }
   ],
   "dosage": {
     "text": "Lyhytvaikutteinen insuliini, {{insulin}} yksikköä",
-     "dose": {
+    "dose": {
       "value": "{{insulin}}",
       "unit": "IU",
       "system": "http://unitsofmeasure.org",
-      "code": "IU"
+      "code": "iU"
     }
   }
 }
