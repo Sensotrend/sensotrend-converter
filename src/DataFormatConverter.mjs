@@ -118,7 +118,15 @@ export default class DataFormatConverter {
       return false;
     }
 
-    const parsed = deepFreeze(JSON.parse(template)); // Freeze the object given it's cached
+    try {
+      template = JSON.parse(template);
+    } catch (error) {
+      this.logger.error('Invalid template for object type "' + objectType + '":');
+      this.logger.error(template);
+      return false;
+    }
+
+    const parsed = deepFreeze(template); // Freeze the object given it's cached
     this.cache.set(objectType, parsed);
 
     return parsed;
