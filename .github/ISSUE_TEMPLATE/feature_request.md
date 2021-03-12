@@ -7,25 +7,55 @@ assignees: ''
 
 ---
 
-When creating a request, please fill in parts 1 and 2 with as much information as possible. A good description is most important for us. Fields in the part 2 can also be filled when analyzing the issue.
+## 1. Background & description
 
-### 1. Description
-[Write the description here…]
+*Why?*
 
-### 2. Requirements and dependencies
-**Known requirements for**
-- **functional:** 
-- **performance:** 
-- **usability:** 
-- **safety:** 
+Describe here
+- The need for the feature (initiated from external/internal request)
+- The goal of the feature
 
-**Dependencies on other issues:** 
+## 2. Requirements
 
-### 3. Implementation details
-**Implementation plan:**
-**Target schedule:** 
+*What?*
 
-### 3.1 OWASP top 10
+#### Functional requirements
+
+Prerequisites
+End results
+Other functional requirements
+Error situations
+
+#### Performance requirements
+
+Memory usage
+Time of the operation
+Simultaneous users
+
+#### Usability requirements
+
+Intended users and their skills
+Instructions for use
+Browser/mobile
+Accessibility
+
+#### Safety requirements
+
+Identify potential safety risks and take them into account accordingly.
+
+## 3. Implementation
+
+*How?*
+
+Describe here
+- Architectural decisions
+- Which other products or product components does this feature use?
+- Which external libraries etc. does this feature use?
+
+#### Security check-up
+
+Check that the OWASP top 10 have been taken into account.
+
 [https://github.com/OWASP/www-project-top-ten/blob/master/index.md](https://github.com/OWASP/www-project-top-ten/blob/master/index.md)
 - [ ] **1 Injection** - [comments]
 - [ ] **2 Broken Authentication** - [comments]
@@ -38,14 +68,20 @@ When creating a request, please fill in parts 1 and 2 with as much information a
 - [ ] **9 Using Components with Known Vulnerabilities** - [comments]
 - [ ] **10 Insufficient Logging & Monitoring** - [comments]
 
-### 4. Verification
-**Verification plan:**
-To be verifified by following steps:
+## 4. Verification
 
-1. [Test step 1]
-2. [Test step 2]
+General description of how to test the feature
+- Functionality
+- Performance
+- Usability
+- Automatically or manually
 
-**Verification results:**
+To be verifified by the following cases:
+
+1. [Test case 1]
+2. [Test case 2]
+
+Verification results:
+
 - [ ] 1. Pass/Fail (SW version, date)
 - [ ] 2. Pass/Fail (SW version, date)
-
