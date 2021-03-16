@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.25-beta",
+  "version": "1.0.26-beta",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
