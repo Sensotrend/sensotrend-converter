@@ -1,10 +1,4 @@
 /* eslint-disable no-unused-vars */
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs-extra';
-import NodeCache from 'node-cache';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Deep freeze an object
@@ -47,10 +41,9 @@ export default class DataFormatConverter {
    * @param {Logger} [logger] Optional, used for logging. If not provided, the Javascript
    * console will be used instead.
    */
-  constructor(logger) {
+  constructor(logger, templateMotor) {
     this.logger = logger;
-    this.cache = new NodeCache();
-    this.templateDirectory = __dirname;
+    this.templateMotor = templateMotor;
   }
 
   /**
@@ -83,52 +76,27 @@ export default class DataFormatConverter {
   }
 
   /**
-   * Implementations of a DataFormatConverter that use loadTemplate() MUST
-   * implement this function and return the directory that contains the
-   * template files as a result (possibly __dirname)
-   */
-  templatePath() {
-    return path.resolve(this.templateDirectory);
-  }
-
-  /**
    * Load a stjs template file from current directory
    *
    * @param {String} objectType String identifier for data type
    */
   async loadTemplate(objectType) {
-    const cached = this.cache.get(objectType);
-    if (cached) {
-      return cached;
+    if (!this.templateMotor) {
+      throw new Error('TemplateMotor is missing!');
     }
 
-    let filePath = path.resolve(this.templatePath(), objectType + '.json');
-    this.logger.debug('Loading template from: ' + filePath);
-    let template;
+    const templateFromMotor = await this.templateMotor.getDefaultTemplate(objectType);
 
     try {
-      const result = fs.ensureFileSync(filePath); // will fail if file does not exist
-      if (fs.pathExistsSync(filePath)) {
-        template = fs.readFileSync(filePath, 'utf8');
-      }
-    } catch (error) {
-      this.logger.error(
-        'Data conversion error: template for object type "' + objectType + '" not found'
-      );
-      return false;
-    }
+      const template = JSON.parse(templateFromMotor);
 
-    try {
-      template = JSON.parse(template);
+      const parsed = deepFreeze(template); // Freeze the object given it's cached
+
+      return parsed;
     } catch (error) {
       this.logger.error('Invalid template for object type "' + objectType + '":');
-      this.logger.error(template);
+      this.logger.error(templateFromMotor);
       return false;
     }
-
-    const parsed = deepFreeze(template); // Freeze the object given it's cached
-    this.cache.set(objectType, parsed);
-
-    return parsed;
   }
 }

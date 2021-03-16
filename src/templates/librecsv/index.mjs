@@ -5,8 +5,8 @@ import moment from 'moment';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 export class LibreCsvDataProcessor extends DataFormatConverter {
-  constructor(logger) {
-    super(logger);
+  constructor(logger, templateMotor) {
+    super(logger, templateMotor);
   }
 
   convertRecordToIntermediate(r, options) {

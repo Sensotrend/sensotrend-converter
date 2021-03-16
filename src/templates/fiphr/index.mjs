@@ -19,8 +19,8 @@ const descriptionIllegalStrings = [' (via Sensotrend Connect)', ' (via Nightscou
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
  */
 export class FIPHRDataProcessor extends DataFormatConverter {
-  constructor(logger) {
-    super(logger);
+  constructor(logger, templateMotor) {
+    super(logger, templateMotor);
   }
 
   /**
@@ -234,7 +234,9 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     try {
       template = await this.loadTemplate('import_' + sourceData.type);
     } catch (e) {
-      this.logger.error('ALERT! Unable to load template for ' + sourceData.type + '. ' + JSON.stringify(e));
+      this.logger.error(
+        'ALERT! Unable to load template for ' + sourceData.type + '. ' + JSON.stringify(e)
+      );
     }
     if (!template) {
       this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');

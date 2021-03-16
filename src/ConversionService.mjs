@@ -40,9 +40,10 @@ export default class ConversionService {
    * @param {String} format Format identifier, for example `nightscout`
    * @param {DataFormatConverter} processor Data processor
    */
-  registerFormatProcessor(format, processor) {
+  registerFormatProcessor(format, processor, templateMotor) {
     this.log('Registered format processor for ' + format);
-    this.supportedFormats[format] = new processor(this.logger);
+
+    this.supportedFormats[format] = new processor(this.logger, templateMotor);
   }
 
   async importRecords(sourceData, options) {
