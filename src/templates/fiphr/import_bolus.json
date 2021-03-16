@@ -42,7 +42,7 @@
       "value": "{{insulin}}",
       "unit": "IU",
       "system": "http://unitsofmeasure.org",
-      "code": "iU"
+      "code": "[iU]"
     }
   }
 }
