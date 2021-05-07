@@ -11,6 +11,8 @@ assignees: ''
 
 *Why?*
 
+Requirement source: [internal/customer/other external + link to the original source if one exists]
+
 Describe here
 - The need for the feature (initiated from external/internal request)
 - The goal of the feature
@@ -39,9 +41,23 @@ Instructions for use
 Browser/mobile
 Accessibility
 
-#### Safety requirements
+#### Risk analysis
 
-Identify potential safety risks and take them into account accordingly.
+*Instructions: 1. Identify risks that may arise due to this issue. 2. Check the product's existing risks and how they may appear in this issue. 3. Describe how each risk is taken into account in this issue. If new risks or risk controls are identified, invite a risk workshop to discuss these.*
+
+- [ ] Risk analysis done and risks updated according to QMS
+
+Identified risks (mark potential new ones by bolding them):
+1. [Description]
+2. [Description]
+
+Related risks from the risk list:
+1. [Identifier, description]
+2. [Identifier, description]
+
+Control and actions (all risks from previous lists):
+1. [Risk, controls, actions]
+2. [Risk, controls, actions]
 
 ## 3. Implementation
 
@@ -83,5 +99,5 @@ To be verifified by the following cases:
 
 Verification results:
 
-- [ ] 1. Pass/Fail (SW version, date)
-- [ ] 2. Pass/Fail (SW version, date)
+- [ ] 1. Pass/Fail (SW version, date, verifier)
+- [ ] 2. Pass/Fail (SW version, date, verifier)
