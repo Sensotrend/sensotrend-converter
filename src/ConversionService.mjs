@@ -61,7 +61,7 @@ export default class ConversionService {
       this.logger.debug(JSON.stringify(sourceData));
       throw new Error('No import processor found for format: ' + options.source);
     }
-    return processor.importRecords(sourceData, options);
+    return await processor.importRecords(sourceData, options);
   }
 
   async exportRecords(sourceData, options) {
@@ -79,7 +79,7 @@ export default class ConversionService {
       this.logger.debug(JSON.stringify(sourceData));
       throw new Error('No export processor found for format: ' + options.source);
     }
-    return processor.exportRecords(sourceData, options);
+    return await processor.exportRecords(sourceData, options);
   }
 
   /**

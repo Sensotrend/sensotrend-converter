@@ -1,13 +1,13 @@
 /* eslint-disable no-case-declarations */
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import moment from 'moment';
-import ST from 'stjs';
 import _ from 'lodash';
 import { v5 } from 'uuid';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { importFiphrGroups } from './import_fiphr_groups.mjs';
+import { exportFiphrGroups } from './export_fiphr_groups.mjs';
+import changeObjectKeyToLowerCase from '../../tools/changeObjectKeyToLowerCase.mjs';
+import { LogWithCounter } from '../../../env.mjs';
 
 const uuidv5 = v5;
 
@@ -15,12 +15,24 @@ const UUID_NAMESPACE = 'd040ecfe-2dd1-11e9-9178-f7b0f1a319bd';
 
 const descriptionIllegalStrings = [' (via Sensotrend Connect)', ' (via Nightscout Connect)'];
 
+const exportFiphrGroupsSmallKey = changeObjectKeyToLowerCase(exportFiphrGroups);
+const importFiphrGroupsSmallKey = changeObjectKeyToLowerCase(importFiphrGroups);
+
+const alertResourceTypeLogWithCounter = new LogWithCounter({
+  firstTimeLog: true,
+  launchTimeCounter: 100,
+});
+const alertRecordTypeLogWithCounter = new LogWithCounter({
+  firstTimeLog: true,
+  launchTimeCounter: 5000,
+});
+
 /**
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
  */
 export class FIPHRDataProcessor extends DataFormatConverter {
-  constructor(logger, templateMotor) {
-    super(logger, templateMotor);
+  constructor(logger) {
+    super(logger);
   }
 
   /**
@@ -29,10 +41,6 @@ export class FIPHRDataProcessor extends DataFormatConverter {
    */
   getRecordTime(record) {
     return new Date(record.effectiveDateTime);
-  }
-
-  templatePath() {
-    return path.resolve(__dirname);
   }
 
   enrichFHIRObject(sourceData) {
@@ -92,6 +100,10 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     return entry;
   }
 
+  removeDash(text) {
+    return text.replace(/-/g, '');
+  }
+
   async _convertRecordFromFHIR(sourceData, context) {
     if (!sourceData.resourceType) {
       return false;
@@ -100,6 +112,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     try {
       let code;
       let type = sourceData.resourceType;
+      let exportFiphrFunction;
 
       if (sourceData.code) {
         code = sourceData.code.coding[0].code;
@@ -109,15 +122,19 @@ export class FIPHRDataProcessor extends DataFormatConverter {
         code = sourceData.medicationCodeableConcept.coding[0].code;
       }
 
-      var template = await this.loadTemplate('export_' + type + code);
+      const codeWithOutDash = this.removeDash(code);
 
-      if (!template) {
-        this.logger.error('ALERT! FHIR resource type ' + sourceData.type + ' not handled');
+      exportFiphrFunction = exportFiphrGroupsSmallKey[`${type}${codeWithOutDash}`.toLowerCase()];
+
+      if (!exportFiphrFunction) {
+        alertResourceTypeLogWithCounter.error(
+          'ALERT! FHIR resource type ' + sourceData.type + ' not handled'
+        );
         this.logger.debug(JSON.stringify(sourceData));
         return;
       }
       let data = this.enrichFHIRObject(sourceData);
-      return ST.transform(template, data);
+      return exportFiphrFunction.call(data);
     } catch (error) {
       this.logger.info(
         'Problem converting data on context: ' +
@@ -223,36 +240,42 @@ export class FIPHRDataProcessor extends DataFormatConverter {
 
   async convertRecord(sourceData, patientReference) {
     if (!sourceData.type || !sourceData.time || !sourceData.deviceId) {
-      this.logger.error('ALERT! Record type, time or device missing, cannot convert data');
-      this.logger.debug(JSON.stringify(sourceData));
+      //alertRecordTypeLogWithCounter.error(
+      //   'ALERT! Record type, time or device missing, cannot convert data'
+      //  );
+      // this.logger.debug(JSON.stringify(sourceData));
       return;
     }
 
-    let template;
+    let fiphrConvertFunction;
     // TODO: It does not make sense to load the templates each time, for each record!
     // These should be memoized!
     try {
-      template = await this.loadTemplate('import_' + sourceData.type);
+      fiphrConvertFunction = importFiphrGroupsSmallKey[sourceData.type.toLowerCase()];
     } catch (e) {
-      this.logger.error(
-        'ALERT! Unable to load template for ' + sourceData.type + '. ' + JSON.stringify(e)
+      alertLogWithCounter.error(
+        'ALERT! Unable to find fiphrConvertFunction to type: ' +
+          sourceData.type +
+          '. ' +
+          JSON.stringify(e)
       );
     }
-    if (!template) {
-      this.logger.error('ALERT! Record type ' + sourceData.type + ' not handled');
+    if (!fiphrConvertFunction) {
+      alertLogWithCounter.error('ALERT! Record type ' + sourceData.type + ' not handled');
       this.logger.debug(JSON.stringify(sourceData));
       return;
     }
     let data = this.enrichObject(sourceData, patientReference);
-
-    return ST.transform(template, data);
+    return fiphrConvertFunction.call(data);
   }
 
   // Convert records to FHIR format
   async exportRecords(input, options) {
-    this.logger.info(
-      'EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
-    );
+    if (process.env.SHOW_LOG) {
+      this.logger.info(
+        'EXPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
+      );
+    }
     if (!options.FHIR_userid) {
       this.logger.info('options.FHIR_userid needed for FHIR exporting');
       return false;
@@ -295,7 +318,9 @@ export class FIPHRDataProcessor extends DataFormatConverter {
         })
       );
       const filtered = convertedRecords.filter(Boolean);
-      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      if (process.env.SHOW_LOG) {
+        this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      }
       return filtered;
     } else {
       let convertedRecords = await Promise.all(
@@ -304,7 +329,9 @@ export class FIPHRDataProcessor extends DataFormatConverter {
         })
       );
       const filtered = convertedRecords.filter(Boolean);
-      this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      if (process.env.SHOW_LOG) {
+        this.logger.info('EXPORTED INTERMEDIATE.\n' + JSON.stringify(filtered));
+      }
       return filtered;
     }
   }

@@ -12,8 +12,8 @@ function discoverDataType(record) {
  * Class to convert Nightscout input data into intermediate Tidepool-like format
  */
 export class NightscoutDataProcessor extends DataFormatConverter {
-  constructor(logger, templateMotor) {
-    super(logger, templateMotor);
+  constructor(logger) {
+    super(logger);
   }
 
   /**
@@ -174,7 +174,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
   }
 
   // Convert records to intermediate format
-  importRecords(input, options) {
+  async importRecords(input, options) {
     this.logger.info(
       'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
     );

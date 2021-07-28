@@ -6,8 +6,8 @@ const converterName = process.env.CONVERTER_NAME || 'Sensotrend Connect';
  * Class to convert Tidepool input data into intermediate Tidepool-like format
  */
 export class TidepoolDataProcessor extends DataFormatConverter {
-  constructor(logger, templateMotor) {
-    super(logger, templateMotor);
+  constructor(logger) {
+    super(logger);
   }
 
   convertRecordToIntermediate(r, options) {
@@ -35,7 +35,7 @@ export class TidepoolDataProcessor extends DataFormatConverter {
   }
 
   // Convert records to intermediate format
-  importRecords(input, options) {
+  async importRecords(input, options) {
     this.logger.info(
       'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
     );

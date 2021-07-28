@@ -5,11 +5,11 @@ import moment from 'moment';
 import DataFormatConverter from '../../DataFormatConverter.mjs';
 
 export class LibreCsvDataProcessor extends DataFormatConverter {
-  constructor(logger, templateMotor) {
-    super(logger, templateMotor);
+  constructor(logger) {
+    super(logger);
   }
 
-  convertRecordToIntermediate(r, options) {
+  async convertRecordToIntermediate(r, options) {
     const data = {
       time: '',
       timezoneOffset: '',
@@ -23,7 +23,7 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
     };
 
     const device = Object.create(data);
-    const devices = [];
+
     moment.defaultFormat = 'MM-DD-YYYY HH:mm';
 
     switch (r.record_type) {
@@ -35,7 +35,7 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
         device.value = parseFloat(r.historic_glucose_mmol_l.replace(/["]/g, ''));
         device.units = 'mmol/l';
-        devices.push(device);
+
         break;
       case '1': //Read glucose measurement
         device.type = 'cbg';
@@ -45,7 +45,7 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
         device.value = parseFloat(r.scan_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'mmol/l';
-        devices.push(device);
+
         break;
       case '2': //Measurement tape (Diabetes)
         device.type = 'smbg';
@@ -54,34 +54,32 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
         device.value = parseFloat(r.strip_glucose_mmol_l.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'mmol/l';
-        devices.push(device);
+
         break;
       case '4': //Fast and  long insulin
         if (r.rapid_acting_insulin_units != '') {
-          const deviceRapid = Object.create(data);
-          deviceRapid.type = 'bolus';
-          deviceRapid.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-          deviceRapid.timezoneOffset = moment().utcOffset();
-          deviceRapid.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceRapid.value = parseFloat(
+          device.type = 'bolus';
+          device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          device.timezoneOffset = moment().utcOffset();
+          device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+          device.value = parseFloat(
             r.rapid_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
           );
-          deviceRapid.units = 'IU';
+          device.units = 'IU';
 
-          devices.push(deviceRapid);
+          break;
         }
         if (r.long_acting_insulin_units != '') {
-          const deviceLong = Object.create(data);
-          deviceLong.type = 'long';
-          deviceLong.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
-          deviceLong.timezoneOffset = moment().utcOffset();
-          deviceLong.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
-          deviceLong.value = parseFloat(
+          device.type = 'long_acting';
+          device.time = moment(r.device_timestamp, moment.defaultFormat).toDate();
+          device.timezoneOffset = moment().utcOffset();
+          device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
+          device.value = parseFloat(
             r.long_acting_insulin_units.replace(/["]/g, '').replace(/[,]/g, '.')
           );
-          deviceLong.units = 'IU';
+          device.units = 'IU';
 
-          devices.push(deviceLong);
+          break;
         }
         break;
       case '5': //Carbohydrates
@@ -92,11 +90,11 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
         device.deviceId = `AbbottFreeStyleLibre${r.serial_number}`;
         device.value = parseFloat(r.carbohydrates_grams.replace(/["]/g, '').replace(/[,]/g, '.'));
         device.units = 'g';
-        devices.push(device);
+
         break;
     }
 
-    return devices;
+    return device;
   }
 
   /**
@@ -111,25 +109,44 @@ export class LibreCsvDataProcessor extends DataFormatConverter {
     return r;
   }
 
-  // Convert records to intermediate format
-  importRecords(input, options) {
-    this.logger.info(
-      'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
-    );
-    const data = input.constructor == Array ? input : [input];
-    let r = [];
-    const conversionFunction = this.convertRecordToIntermediate;
+  spliceArray(arr, options, convertFunc) {
+    let spliceCollection = [];
 
-    for (let i = 0; i < data.length; i++) {
-      const _e = conversionFunction(data[i], options);
-      r.push.apply(r, _e);
+    while (arr.length !== 0) {
+      spliceCollection.push(
+        arr.splice(0, 500).map((element) => {
+          return convertFunc(element, options);
+        })
+      );
     }
-    this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(r));
+
+    return spliceCollection;
+  }
+
+  // Convert records to intermediate format
+  async importRecords(input, options) {
+    if (process.env.SHOW_LOG) {
+      this.logger.info(
+        'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
+      );
+    }
+    const data = input.constructor == Array ? input : [input];
+
+    const splicedData = this.spliceArray(data, options, this.convertRecordToIntermediate);
+    const allRData = await Promise.all(
+      splicedData.map(async (element) => await Promise.all(element))
+    );
+
+    let r = allRData.flat();
+
+    if (process.env.SHOW_LOG) {
+      this.logger.info('IMPORTED INTERMEDIATE.\n' + JSON.stringify(r));
+    }
     return r;
   }
 
   // Convert records to intermediate format
-  exportRecords(input, options) {
+  async exportRecords(input, options) {
     this.logger.info(
       'EXPORTING NOT IMPLEMENT FOR LIBRE CSV.\n' +
         JSON.stringify(input) +

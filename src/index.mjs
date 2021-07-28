@@ -3,9 +3,9 @@ import { NightscoutDataProcessor } from './templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from './templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from './templates/tidepool/index.mjs';
 import { LibreCsvDataProcessor } from './templates/librecsv/index.mjs';
+import makeLogger from '../env.mjs';
 
-import fhirTemplateMotor from './templates/fiphr/templateMotor.mjs';
-import nightScoutTemplateMotor from './templates/nightscout/templateMotor.mjs';
+const logger = makeLogger();
 
 const __ConversionService = _ConversionService;
 
@@ -29,13 +29,9 @@ export { __ConversionService as ConversionService };
  */
 export function DefaultConversionService(logger) {
   const DataConverter = new __ConversionService(logger);
-  DataConverter.registerFormatProcessor(
-    'nightscout',
-    NightscoutDataProcessor,
-    nightScoutTemplateMotor
-  );
-  DataConverter.registerFormatProcessor('fiphr', FIPHRDataProcessor, fhirTemplateMotor);
-  DataConverter.registerFormatProcessor('tidepool', TidepoolDataProcessor, undefined);
-  DataConverter.registerFormatProcessor('libreCsv', LibreCsvDataProcessor, undefined);
+  DataConverter.registerFormatProcessor('nightscout', NightscoutDataProcessor);
+  DataConverter.registerFormatProcessor('fiphr', FIPHRDataProcessor);
+  DataConverter.registerFormatProcessor('tidepool', TidepoolDataProcessor);
+  DataConverter.registerFormatProcessor('libreCsv', LibreCsvDataProcessor);
   return DataConverter;
 }

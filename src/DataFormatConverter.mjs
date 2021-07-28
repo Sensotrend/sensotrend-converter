@@ -41,9 +41,8 @@ export default class DataFormatConverter {
    * @param {Logger} [logger] Optional, used for logging. If not provided, the Javascript
    * console will be used instead.
    */
-  constructor(logger, templateMotor) {
+  constructor(logger) {
     this.logger = logger;
-    this.templateMotor = templateMotor;
   }
 
   /**
@@ -61,7 +60,7 @@ export default class DataFormatConverter {
    * @param {Array} input Array of input objects
    * @param {Object} options Options for converting the data
    */
-  importRecords(input, options) {
+  async importRecords(input, options) {
     throw new Error('Implementation for importRecords() is missing');
   }
 
@@ -71,32 +70,7 @@ export default class DataFormatConverter {
    * @param {Array} input Array of input objects
    * @param {Object} options Options for converting the data
    */
-  exportRecords(input, options) {
+  async exportRecords(input, options) {
     throw new Error('Implementation for exportRecords() is missing');
-  }
-
-  /**
-   * Load a stjs template file from current directory
-   *
-   * @param {String} objectType String identifier for data type
-   */
-  async loadTemplate(objectType) {
-    if (!this.templateMotor) {
-      throw new Error('TemplateMotor is missing!');
-    }
-
-    const templateFromMotor = await this.templateMotor.getDefaultTemplate(objectType);
-
-    try {
-      const template = JSON.parse(templateFromMotor);
-
-      const parsed = deepFreeze(template); // Freeze the object given it's cached
-
-      return parsed;
-    } catch (error) {
-      this.logger.error('Invalid template for object type "' + objectType + '":');
-      this.logger.error(templateFromMotor);
-      return false;
-    }
   }
 }
