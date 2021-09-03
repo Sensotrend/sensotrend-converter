@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { DataFormatConverter } from '../../DataFormatConverter';
+import { DataFormatConverter } from '../../DataFormatConverter.js';
 
 function discoverDataType(record) {
    if (record.insulin || record.carbs || record.created_at || record.duration) return 'treatments';
