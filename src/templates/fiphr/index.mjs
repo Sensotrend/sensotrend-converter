@@ -27,6 +27,11 @@ const alertRecordTypeLogWithCounter = new LogWithCounter({
   launchTimeCounter: 5000,
 });
 
+const alertLogWithCounter = new LogWithCounter({
+  firstTimeLog: true,
+  launchTimeCounter: 100,
+});
+
 /**
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
  */
@@ -240,10 +245,10 @@ export class FIPHRDataProcessor extends DataFormatConverter {
 
   async convertRecord(sourceData, patientReference) {
     if (!sourceData.type || !sourceData.time || !sourceData.deviceId) {
-      //alertRecordTypeLogWithCounter.error(
-      //   'ALERT! Record type, time or device missing, cannot convert data'
-      //  );
-      // this.logger.debug(JSON.stringify(sourceData));
+      alertRecordTypeLogWithCounter.error(
+        'ALERT! Record type, time or device missing, cannot convert data'
+      );
+      this.logger.debug(JSON.stringify(sourceData));
       return;
     }
 

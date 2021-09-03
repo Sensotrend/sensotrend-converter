@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "1.0.26-beta",
+  "version": "1.0.27-beta",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
@@ -22,23 +22,23 @@
   },
   "type": "module",
   "devDependencies": {
-    "@babel/core": "^7.14.8",
-    "@babel/eslint-parser": "^7.14.7",
+    "@babel/core": "^7.15.4",
+    "@babel/eslint-parser": "^7.15.4",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/plugin-proposal-private-methods": "^7.14.5",
-    "@babel/preset-env": "^7.14.8",
+    "@babel/preset-env": "^7.15.4",
     "chai": "^4.3.4",
     "env-cmd": "^10.1.0",
-    "eslint": "^7.31.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.6.7",
     "minami": "^1.2.3",
-    "mocha": "^9.0.3",
+    "mocha": "^9.1.1",
     "nyc": "^15.1.0",
     "source-map-support": "^0.5.19",
-    "supertest": "^6.1.4",
+    "supertest": "^6.1.6",
     "unzipper": "^0.10.11"
   },
   "nyc": {
