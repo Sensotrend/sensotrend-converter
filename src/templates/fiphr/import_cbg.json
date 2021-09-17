@@ -1,14 +1,12 @@
 {
   "resourceType": "Observation",
   "meta": {
-    "profile": [
-      "http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3"
-    ]
+    "profile": ["http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3"]
   },
   "language": "fi",
   "text": {
     "status": "extensions",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Koodi: Kudossokeri (LOINC 14745-4)<br />{{_statusMessage}}<br /></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Koodi: Kudossokeri (LOINC 14745-4)<br />{{_statusMessage}}<br /><br />MeasurementStyle: {{scanOrHistoricInfo}}</div>"
   },
   "identifier": [
     {

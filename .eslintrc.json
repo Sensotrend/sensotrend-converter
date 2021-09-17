@@ -1,0 +1,19 @@
+{
+  "parser": "@babel/eslint-parser",
+  "env": {
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-underscore-dangle": "off",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+    "strict": 0
+  }
+}
