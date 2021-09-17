@@ -62,3 +62,6 @@ typings/
 
 # OSX directory information
 .DS_Store
+
+# not send to git unzip file
+/tests/testTemplates/*.json
