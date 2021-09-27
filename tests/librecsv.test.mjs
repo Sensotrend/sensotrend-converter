@@ -2,12 +2,14 @@ import fs from 'fs';
 import readline from 'readline';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import 'chai/register-should.js';
 import { v4 as uuidv4 } from 'uuid';
 import unzipper from 'unzipper';
+import { should } from 'chai'; // Using Should style
 
 import makeLogger from '../env.mjs';
 import { DefaultConversionService } from '../src/index.mjs';
+
+should();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -46,34 +48,24 @@ async function convertFiphr(input, options) {
   return DataFormatConverter.convert(input, options);
 }
 
-async function recordShouldHaveKeys(records) {
-  for (let index = 0; index < records.length; index++) {
-    records[index].should.to.have.any.keys(
-      'dosage',
-      'resourceType',
-      'meta',
-      'language',
-      'text',
-      'identifier',
-      'status',
-      'category',
-      'code',
-      'subject',
-      'effectiveDateTime',
-      'issued',
-      'performer',
-      'valueQuantity',
-      'medicationCodeableConcept'
-    );
-  }
-}
-
-async function recordsShouldHandler(records) {
-  let spliceShould = [];
-  while (records.length !== 0) {
-    spliceShould.push(records.splice(0, 1000).map((data) => recordShouldHaveKeys(data)));
-  }
-  return await Promise.all(spliceShould);
+function recordShouldHaveKeys(record) {
+  record.should.include.any.keys(
+    'category',
+    'code',
+    'dosage',
+    'effectiveDateTime',
+    'identifier',
+    'issued',
+    'language',
+    'medicationCodeableConcept',
+    'meta',
+    'performer',
+    'resourceType',
+    'status',
+    'subject',
+    'text',
+    'valueQuantity'
+  );
 }
 
 describe('Convert libreCsv to fiphr ', function () {
@@ -83,8 +75,6 @@ describe('Convert libreCsv to fiphr ', function () {
     FHIR_userid: uuidv4(),
     csvGenerator: true,
   };
-
-  before(async () => {});
 
   it('Start first test', async () => {
     logger.info('Start');
@@ -100,12 +90,10 @@ describe('Convert libreCsv to fiphr ', function () {
     const convertFiphrResults = await Promise.all(convertRecords);
     logger.info('End convert!');
 
-    logger.info('Add test function');
-    const testData = convertFiphrResults.map((element) => recordsShouldHandler(element));
-    logger.info('End add test function');
-
-    logger.info('start testing!');
-    await Promise.all(testData);
-    logger.info('start testing2!');
+    logger.info('Test keys');
+    convertFiphrResults
+      .flatMap((n) => n.flat())
+      .forEach((element) => recordShouldHaveKeys(element));
+    logger.info('End test keys');
   });
 });
