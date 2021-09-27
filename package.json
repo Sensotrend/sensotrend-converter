@@ -1,61 +1,66 @@
 {
   "name": "sensotrend-converter",
-  "version": "0.1.8-beta",
-  "main": "src/index.js",
+  "version": "1.1.4-beta",
+  "main": "src/index.mjs",
   "keywords": [
     "FHIR",
     "Nightscout",
     "Tidepool",
     "HL7",
-    "Sensotrend"
+    "Sensotrend",
+    "LibreCsv"
   ],
   "license": "BSD-2-Clause",
   "description": "Data format converter for managing various JSON data formats related to type 1 diabetes",
   "repository": "https://github.com/sensotrend/sensotrend-converter",
   "dependencies": {
-    "fs-extra": "^8.0.1",
-    "moment": "^2.24.0",
-    "node-cache": "^4.2.0",
+    "fs-extra": "^9.1.0",
+    "moment": "^2.29.1",
+    "node-cache": "^5.1.2",
     "stjs": "0.0.5",
-    "uuid": "^3.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.3.3"
   },
-  "esm": {
-    "cjs": true,
-    "sourceMap": false,
-    "cache": false
-  },
+  "type": "module",
   "devDependencies": {
-    "env-cmd": "^9.0.1",
-    "esm": "^3.2.25",
+    "@babel/core": "^7.12.17",
+    "@babel/eslint-parser": "^7.12.17",
+    "@babel/eslint-plugin": "^7.12.13",
+    "@babel/plugin-proposal-class-properties": "^7.12.13",
+    "@babel/plugin-proposal-private-methods": "^7.12.13",
+    "@babel/preset-env": "^7.12.17",
+    "chai": "^4.3.0",
+    "env-cmd": "^10.1.0",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^7.2.0",
     "istanbul": "^0.4.5",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^3.6.6",
     "minami": "^1.2.3",
-    "mocha": "^5.2.0",
-    "nyc": "^14.1.1",
-    "should": "^13.2.3",
-    "source-map-support": "^0.5.11",
-    "supertest": "^4.0.2"
+    "mocha": "^8.3.0",
+    "nyc": "^15.1.0",
+    "source-map-support": "^0.5.19",
+    "supertest": "^6.1.3",
+    "unzipper": "^0.10.11"
   },
   "nyc": {
     "all": false,
     "sourceMap": false,
     "instrument": true,
-    "cache": false,
-    "require": [
-      "esm"
-    ]
+    "cache": false
   },
   "engines": {
-    "node": "^12.2.0",
-    "npm": "6.x"
+    "node": ">= 14.15.2",
+    "npm": ">= 7.5.4"
   },
   "scripts": {
     "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
-    "test": "mocha --exit --timeout 8000 --require esm tests/*.test.js",
-    "coverage": "nyc mocha --exit --timeout 8000 --require esm tests/*.test.js",
-    "coverage-html": "rm -rf .nyc_output && npm run-script coverage && nyc report --reporter html && nyc report --reporter text-lcov > coverage/codecov.log"
+    "test": "mocha --exit --timeout 8000 tests/*.test.mjs",
+    "test2": "npm run unzip && mocha --exit --timeout 199000 tests/librecsv.test.mjs",
+    "coverage": "nyc mocha --exit --timeout 8000 tests/*.test.mjs",
+    "coverage-html": "rm -rf .nyc_output && npm run-script coverage && nyc report --reporter html && nyc report --reporter text-lcov > coverage/codecov.log",
+    "unzip": "node ./tools/unZipFile.mjs"
   },
   "jshintConfig": {
-    "esversion": 8
+    "esversion": 9
   }
 }
