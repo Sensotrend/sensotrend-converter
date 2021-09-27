@@ -40,9 +40,10 @@ export default class ConversionService {
    * @param {String} format Format identifier, for example `nightscout`
    * @param {DataFormatConverter} processor Data processor
    */
-  registerFormatProcessor(format, processor) {
+  registerFormatProcessor(format, processor, templateMotor) {
     this.log('Registered format processor for ' + format);
-    this.supportedFormats[format] = new processor(this.logger);
+
+    this.supportedFormats[format] = new processor(this.logger, templateMotor);
   }
 
   async importRecords(sourceData, options) {
@@ -60,7 +61,7 @@ export default class ConversionService {
       this.logger.debug(JSON.stringify(sourceData));
       throw new Error('No import processor found for format: ' + options.source);
     }
-    return processor.importRecords(sourceData, options);
+    return await processor.importRecords(sourceData, options);
   }
 
   async exportRecords(sourceData, options) {
@@ -78,7 +79,7 @@ export default class ConversionService {
       this.logger.debug(JSON.stringify(sourceData));
       throw new Error('No export processor found for format: ' + options.source);
     }
-    return processor.exportRecords(sourceData, options);
+    return await processor.exportRecords(sourceData, options);
   }
 
   /**

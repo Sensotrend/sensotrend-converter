@@ -77,6 +77,28 @@ export default class FiphrConvert {
             */
       }
     }
+
+    if (entry.type === 'carbs') {
+      if (!isNaN(entry.value)) {
+        entry.carbInput = Number(entry.value);
+      }
+    }
+
+    if (entry.type === 'long_acting') {
+      if (entry.value) {
+        entry.insulin = parseFloat(entry.value.toFixed(1));
+      } else {
+        entry.insulin = 0;
+      }
+    }
+
+    if (entry.type === 'short_acting') {
+      if (entry.value) {
+        entry.insulin = parseFloat(entry.value.toFixed(1));
+      } else {
+        entry.insulin = 0;
+      }
+    }
     /*
       if (entry.direction) {
          textArray.push("Suunta: " + entry.direction);

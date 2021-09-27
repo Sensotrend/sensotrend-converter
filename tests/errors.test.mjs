@@ -1,10 +1,12 @@
-import 'chai/register-should.js';
+import { should } from 'chai';
+
 import ConversionService from '../src/ConversionService.mjs';
 import { NightscoutDataProcessor } from '../src/templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from '../src/templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from '../src/templates/tidepool/index.mjs';
-
 import DataFormatConverter from '../src/DataFormatConverter.mjs';
+
+should();
 
 const abstractConverter = new DataFormatConverter();
 
@@ -26,7 +28,13 @@ describe('Data conversion', function () {
       target: 'fiphr',
       FHIR_userid: 'abc',
     };
-    DataConverter.convert(data, options).should.be.rejected();
+
+    try {
+      await DataConverter.convert(data, options);
+    } catch (error) {
+      error.message.should.equal('Trying to convert data without format spec');
+    }
+
     //should(DataConverter.convert(data, options)).be.rejected();
   });
 
@@ -37,7 +45,11 @@ describe('Data conversion', function () {
       FHIR_userid: 'abc',
     };
 
-    DataConverter.convert(data, options).should.be.rejected();
+    try {
+      await DataConverter.convert(data, options);
+    } catch (error) {
+      error.message.should.equal('Trying to convert data without format spec');
+    }
     //should(DataConverter.convert(data, options)).be.rejected();
   });
 
@@ -48,8 +60,11 @@ describe('Data conversion', function () {
       target: 'fiphr',
       FHIR_userid: 'abc',
     };
-
-    DataConverter.importRecords(data, options).should.be.rejected();
+    try {
+      await DataConverter.importRecords(data, options);
+    } catch (error) {
+      error.message.should.equal('No import processor found for format: nonexistingformat');
+    }
     //should(DataConverter.importRecords(data, options)).be.rejected();
   });
 
@@ -60,7 +75,11 @@ describe('Data conversion', function () {
       target: 'nonexistingformat',
       FHIR_userid: 'abc',
     };
-    DataConverter.exportRecords(data, options).should.be.rejected();
+    try {
+      await DataConverter.exportRecords(data, options);
+    } catch (error) {
+      error.message.should.equal('No export processor found for format: fiphr');
+    }
     //should(DataConverter.exportRecords(data, options)).be.rejected();
   });
 
@@ -76,11 +95,17 @@ describe('Abstract implementation of DataFormatConverter', function () {
     (function () {
       abstractConverter.getRecordTime({});
     }.should.throw('Implementation for getRecordTime() is missing'));
-    (function () {
-      abstractConverter.importRecords({});
-    }.should.throw('Implementation for importRecords() is missing'));
-    (function () {
-      abstractConverter.exportRecords({});
-    }.should.throw('Implementation for exportRecords() is missing'));
+
+    try {
+      await abstractConverter.importRecords({});
+    } catch (error) {
+      error.message.should.equal('Implementation for importRecords() is missing');
+    }
+
+    try {
+      await abstractConverter.exportRecords({});
+    } catch (error) {
+      error.message.should.equal('Implementation for exportRecords() is missing');
+    }
   });
 });

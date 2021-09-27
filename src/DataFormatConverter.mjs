@@ -1,10 +1,4 @@
 /* eslint-disable no-unused-vars */
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs-extra';
-import NodeCache from 'node-cache';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Deep freeze an object
@@ -49,8 +43,6 @@ export default class DataFormatConverter {
    */
   constructor(logger) {
     this.logger = logger;
-    this.cache = new NodeCache();
-    this.templateDirectory = __dirname;
   }
 
   /**
@@ -68,7 +60,7 @@ export default class DataFormatConverter {
    * @param {Array} input Array of input objects
    * @param {Object} options Options for converting the data
    */
-  importRecords(input, options) {
+  async importRecords(input, options) {
     throw new Error('Implementation for importRecords() is missing');
   }
 
@@ -78,57 +70,7 @@ export default class DataFormatConverter {
    * @param {Array} input Array of input objects
    * @param {Object} options Options for converting the data
    */
-  exportRecords(input, options) {
+  async exportRecords(input, options) {
     throw new Error('Implementation for exportRecords() is missing');
-  }
-
-  /**
-   * Implementations of a DataFormatConverter that use loadTemplate() MUST
-   * implement this function and return the directory that contains the
-   * template files as a result (possibly __dirname)
-   */
-  templatePath() {
-    return path.resolve(this.templateDirectory);
-  }
-
-  /**
-   * Load a stjs template file from current directory
-   *
-   * @param {String} objectType String identifier for data type
-   */
-  async loadTemplate(objectType) {
-    const cached = this.cache.get(objectType);
-    if (cached) {
-      return cached;
-    }
-
-    let filePath = path.resolve(this.templatePath(), objectType + '.json');
-    this.logger.debug('Loading template from: ' + filePath);
-    let template;
-
-    try {
-      const result = fs.ensureFileSync(filePath); // will fail if file does not exist
-      if (fs.pathExistsSync(filePath)) {
-        template = fs.readFileSync(filePath, 'utf8');
-      }
-    } catch (error) {
-      this.logger.error(
-        'Data conversion error: template for object type "' + objectType + '" not found'
-      );
-      return false;
-    }
-
-    try {
-      template = JSON.parse(template);
-    } catch (error) {
-      this.logger.error('Invalid template for object type "' + objectType + '":');
-      this.logger.error(template);
-      return false;
-    }
-
-    const parsed = deepFreeze(template); // Freeze the object given it's cached
-    this.cache.set(objectType, parsed);
-
-    return parsed;
   }
 }
