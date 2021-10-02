@@ -1,4 +1,6 @@
-import { should } from 'chai';
+import chai, { expect } from 'chai';
+import promised from 'chai-as-promised';
+import 'chai/register-should.js';
 
 import ConversionService from '../src/ConversionService.mjs';
 import { NightscoutDataProcessor } from '../src/templates/nightscout/index.mjs';
@@ -6,7 +8,7 @@ import { FIPHRDataProcessor } from '../src/templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from '../src/templates/tidepool/index.mjs';
 import DataFormatConverter from '../src/DataFormatConverter.mjs';
 
-should();
+chai.use(promised);
 
 const abstractConverter = new DataFormatConverter();
 
@@ -21,21 +23,14 @@ DataConverter.registerFormatProcessor('nightscout', NightscoutDataProcessor);
 DataConverter.registerFormatProcessor('fiphr', FIPHRDataProcessor);
 DataConverter.registerFormatProcessor('tidepool', TidepoolDataProcessor);
 
-describe('Data conversion', function () {
+describe('Data converter errors', function () {
   it('should fail when source format is missing', async function () {
     let data = [{}];
     let options = {
       target: 'fiphr',
       FHIR_userid: 'abc',
     };
-
-    try {
-      await DataConverter.convert(data, options);
-    } catch (error) {
-      error.message.should.equal('Trying to convert data without format spec');
-    }
-
-    //should(DataConverter.convert(data, options)).be.rejected();
+    await expect(DataConverter.convert(data, options)).to.be.rejectedWith('Trying to convert data without format spec');
   });
 
   it('should fail when target format is missing', async function () {
@@ -45,12 +40,7 @@ describe('Data conversion', function () {
       FHIR_userid: 'abc',
     };
 
-    try {
-      await DataConverter.convert(data, options);
-    } catch (error) {
-      error.message.should.equal('Trying to convert data without format spec');
-    }
-    //should(DataConverter.convert(data, options)).be.rejected();
+    await expect(DataConverter.convert(data, options)).to.be.rejectedWith('Trying to convert data without format spec');
   });
 
   it('should fail when source format converter is missing', async function () {
@@ -60,12 +50,7 @@ describe('Data conversion', function () {
       target: 'fiphr',
       FHIR_userid: 'abc',
     };
-    try {
-      await DataConverter.importRecords(data, options);
-    } catch (error) {
-      error.message.should.equal('No import processor found for format: nonexistingformat');
-    }
-    //should(DataConverter.importRecords(data, options)).be.rejected();
+    await expect(DataConverter.importRecords(data, options)).to.be.rejectedWith('No import processor found for format: nonexistingformat');
   });
 
   it('should fail when target format converter is missing', async function () {
@@ -75,12 +60,7 @@ describe('Data conversion', function () {
       target: 'nonexistingformat',
       FHIR_userid: 'abc',
     };
-    try {
-      await DataConverter.exportRecords(data, options);
-    } catch (error) {
-      error.message.should.equal('No export processor found for format: fiphr');
-    }
-    //should(DataConverter.exportRecords(data, options)).be.rejected();
+    await expect(DataConverter.exportRecords(data, options)).to.be.rejectedWith('No export processor found for format: fiphr');
   });
 
   it('should fail when asking for date an object not sourced from the converter', async function () {
@@ -96,16 +76,8 @@ describe('Abstract implementation of DataFormatConverter', function () {
       abstractConverter.getRecordTime({});
     }.should.throw('Implementation for getRecordTime() is missing'));
 
-    try {
-      await abstractConverter.importRecords({});
-    } catch (error) {
-      error.message.should.equal('Implementation for importRecords() is missing');
-    }
+    await expect(abstractConverter.importRecords({})).to.be.rejectedWith('Implementation for importRecords() is missing');
 
-    try {
-      await abstractConverter.exportRecords({});
-    } catch (error) {
-      error.message.should.equal('Implementation for exportRecords() is missing');
-    }
+    await expect(abstractConverter.exportRecords({})).to.be.rejectedWith('Implementation for exportRecords() is missing');
   });
 });
