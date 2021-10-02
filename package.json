@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "2.0.1-beta",
+  "version": "2.0.3",
   "main": "src/index.mjs",
   "keywords": [
     "FHIR",
@@ -52,11 +52,12 @@
     "npm": ">= 6.0.0"
   },
   "scripts": {
-    "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
-    "test": "mocha --exit --timeout 18000 tests/*.test.mjs",
-    "test_librecsv_convert": "mocha --exit --timeout 18000 tests/librecsv.test.mjs",
     "coverage": "nyc mocha --exit --timeout 8000 tests/*.test.mjs",
     "coverage-html": "rm -rf .nyc_output && npm run-script coverage && nyc report --reporter html && nyc report --reporter text-lcov > coverage/codecov.log",
+    "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
+    "lint": "./node_modules/eslint/bin/eslint.js **/*.mjs",
+    "test": "mocha --exit --timeout 18000 tests/*.test.mjs",
+    "test_librecsv_convert": "mocha --exit --timeout 18000 tests/librecsv.test.mjs",
     "unzip": "node ./tools/unZipFile.mjs"
   },
   "jshintConfig": {

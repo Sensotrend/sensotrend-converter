@@ -5,7 +5,7 @@ import { TidepoolDataProcessor } from './templates/tidepool/index.mjs';
 import { LibreCsvDataProcessor } from './templates/librecsv/index.mjs';
 import makeLogger from '../env.mjs';
 
-const logger = makeLogger();
+const defaultLogger = makeLogger();
 
 const __ConversionService = _ConversionService;
 
@@ -27,7 +27,7 @@ export { __ConversionService as ConversionService };
  *
  * @param {Logger} [logger] Used for logging. If not supplied, logging is output to the Javascript console
  */
-export function DefaultConversionService(logger) {
+export function DefaultConversionService(logger = defaultLogger) {
   const DataConverter = new __ConversionService(logger);
   DataConverter.registerFormatProcessor('nightscout', NightscoutDataProcessor);
   DataConverter.registerFormatProcessor('fiphr', FIPHRDataProcessor);
