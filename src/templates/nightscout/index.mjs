@@ -51,6 +51,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
       }
     }
 
+    // eslint-disable-next-line no-unused-vars
     let type = '';
 
     let device = record.device ? record.device : record.enteredBy;
@@ -107,6 +108,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   convertIntermediateToNS(e, options) {
     if (e.value && e.units) {
       if (e.units == 'mmol/l') {
@@ -172,7 +174,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
   }
 
   // Convert records to intermediate format
-  importRecords(input, options) {
+  async importRecords(input, options) {
     this.logger.info(
       'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
     );

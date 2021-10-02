@@ -35,7 +35,7 @@ export class TidepoolDataProcessor extends DataFormatConverter {
   }
 
   // Convert records to intermediate format
-  importRecords(input, options) {
+  async importRecords(input, options) {
     this.logger.info(
       'IMPORTING INTERMEDIATE.\n' + JSON.stringify(input) + '\n' + JSON.stringify(options)
     );

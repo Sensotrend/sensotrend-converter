@@ -1,8 +1,11 @@
+import { should } from 'chai'; // Using Should style
+
 import ConversionService from '../src/ConversionService.mjs';
 import { NightscoutDataProcessor } from '../src/templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from '../src/templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from '../src/templates/tidepool/index.mjs';
-import 'chai/register-should.js';
+
+should();
 
 const logger = {};
 logger.info = console.log;
@@ -396,8 +399,7 @@ describe('Data conversion service', function () {
       language: 'fi',
       text: {
         status: 'generated',
-        div:
-          '<div xmlns="http://www.w3.org/1999/xhtml">Arvioitu hiilihydraattimäärä: 15 g<br/>Laite: MDT-554 (via Sensotrend Connect)</div>',
+        div: '<div xmlns="http://www.w3.org/1999/xhtml">Arvioitu hiilihydraattimäärä: 15 g<br/>Laite: MDT-554 (via Sensotrend Connect)</div>',
       },
       identifier: [
         {

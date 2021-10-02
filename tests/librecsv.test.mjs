@@ -2,25 +2,31 @@ import fs from 'fs';
 import readline from 'readline';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import 'chai/register-should.js';
 import { v4 as uuidv4 } from 'uuid';
+import unzipper from 'unzipper';
+import { should } from 'chai'; // Using Should style
 
 import makeLogger from '../env.mjs';
 import { DefaultConversionService } from '../src/index.mjs';
+
+should();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const logger = makeLogger();
 const DataFormatConverter = DefaultConversionService(logger);
 
-async function* openCsvTestFile() {
-  const unzipFile = path.join(__dirname, 'testTemplates', 'UnzipDemoMaterial.json');
+async function openCSVTestFile2() {
+  let lineArray = [];
+  const unzipFile = path.join(__dirname, 'testTemplates', 'demoMaterial.zip');
   if (!fs.existsSync(unzipFile)) {
     throw new Error('File is not exists');
   }
 
+  const directory = await unzipper.Open.file(unzipFile);
+
   const rl = readline.createInterface({
-    input: fs.createReadStream(unzipFile),
+    input: directory.files[0].stream(),
     crlfDelay: Infinity,
   });
 
@@ -31,9 +37,35 @@ async function* openCsvTestFile() {
       case ']':
         break;
       default:
-        yield JSON.parse(line.replace(/[,]$/g, ''));
+        lineArray.push(JSON.parse(line.replace(/[,]$/g, '')));
     }
   }
+
+  return lineArray;
+}
+
+async function convertFiphr(input, options) {
+  return DataFormatConverter.convert(input, options);
+}
+
+function recordShouldHaveKeys(record) {
+  record.should.include.any.keys(
+    'category',
+    'code',
+    'dosage',
+    'effectiveDateTime',
+    'identifier',
+    'issued',
+    'language',
+    'medicationCodeableConcept',
+    'meta',
+    'performer',
+    'resourceType',
+    'status',
+    'subject',
+    'text',
+    'valueQuantity'
+  );
 }
 
 describe('Convert libreCsv to fiphr ', function () {
@@ -44,44 +76,24 @@ describe('Convert libreCsv to fiphr ', function () {
     csvGenerator: true,
   };
 
-  let generator;
-  let calculate = 0;
-
-  before(async () => {
-    try {
-      generator = openCsvTestFile();
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   it('Start first test', async () => {
-    for await (const payloads of generator) {
-      if (payloads.length > 0) {
-        const records = await DataFormatConverter.convert(payloads, options);
-        calculate += records.length;
-        logger.info(`Calculated how many records handled: ${calculate.toString()}\r\n`);
-        for (const recordValidation of records) {
-          logger.info(`Record from converter: ${JSON.stringify(recordValidation)}\r\n`);
-          recordValidation.should.to.have.any.keys(
-            'dosage',
-            'resourceType',
-            'meta',
-            'language',
-            'text',
-            'identifier',
-            'status',
-            'category',
-            'code',
-            'subject',
-            'effectiveDateTime',
-            'issued',
-            'performer',
-            'valueQuantity',
-            'medicationCodeableConcept'
-          );
-        }
-      }
-    }
+    logger.info('Start');
+    const linesFromTestFiles = await openCSVTestFile2();
+    logger.info('Ready');
+
+    logger.info('Create convert function');
+    const convertRecords = linesFromTestFiles.map((record) => convertFiphr(record, options));
+
+    logger.info('End Create convert function');
+
+    logger.info('Start convert!');
+    const convertFiphrResults = await Promise.all(convertRecords);
+    logger.info('End convert!');
+
+    logger.info('Test keys');
+    convertFiphrResults
+      .flatMap((n) => n.flat())
+      .forEach((element) => recordShouldHaveKeys(element));
+    logger.info('End test keys');
   });
 });

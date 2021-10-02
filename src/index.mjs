@@ -3,6 +3,9 @@ import { NightscoutDataProcessor } from './templates/nightscout/index.mjs';
 import { FIPHRDataProcessor } from './templates/fiphr/index.mjs';
 import { TidepoolDataProcessor } from './templates/tidepool/index.mjs';
 import { LibreCsvDataProcessor } from './templates/librecsv/index.mjs';
+import makeLogger from '../env.mjs';
+
+const logger = makeLogger();
 
 const __ConversionService = _ConversionService;
 
