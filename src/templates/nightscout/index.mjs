@@ -8,6 +8,22 @@ function discoverDataType(record) {
   return 'treatments';
 }
 
+function toTimezone(minutes) {
+  const h = Math.floor(minutes / 60).toString();
+  const m = (minutes % 60).toString();
+  return `${
+    minutes < 0 ? '-' : '+'
+  }${
+    h.length < 2 ? '0' : ''
+  }${
+    h
+  }${
+    m.length < 2 ? '0' : ''
+  }${
+    m
+  }`
+}
+
 /**
  * Class to convert Nightscout input data into intermediate Tidepool-like format
  */
@@ -120,8 +136,13 @@ export class NightscoutDataProcessor extends DataFormatConverter {
       }
     }
 
-    const time = moment(e.time).utcOffset(e.timezoneOffset);
-    const timeString = time.format('YYYY-MM-DDTHH:mm:ssZ'); // toISOString(true);
+    // This does not set the correct UTC offset, rather the local timezone.
+    const time = moment(e.time).utcOffset(e.timezoneOffset, true);
+
+    const adjustedTime = time.clone().add(e.timezoneOffset, 'minutes');
+    const timeString = adjustedTime.toISOString().replace('Z', toTimezone(e.timezoneOffset));
+
+    console.log('Date', e.time, timeString, time.utcOffset(), time.isUtcOffset());
 
     let _e;
 
@@ -158,6 +179,7 @@ export class NightscoutDataProcessor extends DataFormatConverter {
           device: e.deviceId,
           created_at: timeString,
           date: time.valueOf(),
+          dateString: timeString,
           type: 'Meal Bolus',
         };
 

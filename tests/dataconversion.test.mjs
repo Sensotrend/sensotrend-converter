@@ -346,7 +346,7 @@ describe('Data conversion service', function () {
         device: 'MDT-554',
         carbs: 15,
         insulin: 1.3,
-        created_at: '2019-04-01T10:26:23+03:00',
+        created_at: '2019-04-01T10:26:23.591+0100',
         eventType: 'Meal Bolus',
       },
       {
@@ -356,8 +356,8 @@ describe('Data conversion service', function () {
         uuid: '93038829-06da-4413-96ac-6b879be99973',
         carbs: 15,
         insulin: 1.3,
-        created_at: '2019-07-19T08:43:02Z',
-        sysTime: '2019-07-19T11:43:02.180+0300',
+        created_at: '2019-07-19T08:43:02.200Z',
+        sysTime: '2019-07-19T11:43:02.159+0300',
         _id: '9303882906da441396ac6b87',
       },
     ];
@@ -380,7 +380,7 @@ describe('Data conversion service', function () {
 
     let records2 = await DataConverter.convert(records, options);
 
-    console.log('records2', records2);
+    // console.log('records2', records2);
 
     records2[0].carbs.should.equal(15);
     records2[1].insulin.should.equal(1.3);
