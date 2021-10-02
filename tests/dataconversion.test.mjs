@@ -37,8 +37,6 @@ describe('Data conversion service', function () {
       },
     ];
 
-    console.log('Converting tidepool to FHIR');
-
     let options = {
       source: 'tidepool',
       target: 'fiphr',
@@ -49,7 +47,7 @@ describe('Data conversion service', function () {
 
     records[0].effectiveDateTime.should.equal('2019-01-26T20:49:35.000+02:00');
     records[0].resourceType.should.equal('MedicationAdministration');
-    console.log('Got FHIR resource', records[0]);
+    // console.log('Got FHIR resource', records[0]);
 
     options = {
       source: 'fiphr',
@@ -119,7 +117,7 @@ describe('Data conversion service', function () {
 
     let records = await DataConverter.convert(tidepool_sample, options);
 
-    console.log('Intermediate wizard entry', records);
+    // console.log('Intermediate wizard entry', records);
 
     options = {
       source: 'fiphr',
@@ -431,8 +429,10 @@ describe('Data conversion service', function () {
       subject: {
         reference: 'Patient/1710136',
       },
-      effectiveDateTime: '2019-04-01T11:21:28.000+03:00',
-      issued: '2019-04-01T11:21:28.000+03:00',
+      // effectiveDateTime: '2019-04-01T11:21:28.000+03:00',
+      // issued: '2019-04-01T11:21:28.000+03:00',
+      effectiveDateTime: '2019-02-01T11:21:28.000+01:00',
+      issued: '2019-02-01T11:21:28.000+01:00',
       performer: [
         {
           reference: 'Patient/1710136',
@@ -454,6 +454,8 @@ describe('Data conversion service', function () {
 
     let records = await DataConverter.convert(FHIRCarbEntry, options);
 
+    // console.log('Records', records);
+
     options = {
       source: 'tidepool',
       target: 'fiphr',
@@ -461,6 +463,8 @@ describe('Data conversion service', function () {
     };
 
     let records2 = await DataConverter.convert(records, options);
+
+    // console.log('Records 2', records2);
 
     records2[0].valueQuantity.value.should.equal(FHIRCarbEntry.valueQuantity.value);
     records2[0].effectiveDateTime.should.equal(FHIRCarbEntry.effectiveDateTime);
@@ -491,6 +495,8 @@ describe('Data conversion service', function () {
     };
 
     const records = await DataConverter.convert(tidepoolLibreScanEntry, options);
+
+    console.log('Records', records);
 
     records[0].code.coding[0].code.should.equal('14745-4');
     records[0].effectiveDateTime.should.equal('2018-01-09T20:42:10.000-01:00');

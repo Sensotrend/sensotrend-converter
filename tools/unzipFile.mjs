@@ -50,7 +50,7 @@ async function main() {
   try {
     await unzipFile();
   } catch (err) {
-    console.log(`Error when try to unzip file: ${err}`);
+    console.error(`Error when try to unzip file: ${err}`);
   }
   process.exit(0);
 }

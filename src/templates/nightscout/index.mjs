@@ -12,7 +12,7 @@ function toTimezone(minutes) {
   const h = Math.floor(minutes / 60).toString();
   const m = (minutes % 60).toString();
   return `${
-    minutes < 0 ? '-' : '+'
+    minutes >= 0 ? '+' : ''
   }${
     h.length < 2 ? '0' : ''
   }${
@@ -137,12 +137,10 @@ export class NightscoutDataProcessor extends DataFormatConverter {
     }
 
     // This does not set the correct UTC offset, rather the local timezone.
-    const time = moment(e.time).utcOffset(e.timezoneOffset, true);
-
+    // See https://momentjs.com/guides/#/parsing/
+    const time = moment.utc(e.time);
     const adjustedTime = time.clone().add(e.timezoneOffset, 'minutes');
     const timeString = adjustedTime.toISOString().replace('Z', toTimezone(e.timezoneOffset));
-
-    console.log('Date', e.time, timeString, time.utcOffset(), time.isUtcOffset());
 
     let _e;
 
