@@ -32,6 +32,22 @@ const alertLogWithCounter = new LogWithCounter({
   launchTimeCounter: 100,
 });
 
+function toTimezone(minutes) {
+  const h = Math.floor(Math.abs(minutes / 60)).toString();
+  const m = (minutes % 60).toString();
+  return `${
+    minutes < 0 ? '-' : '+'
+  }${
+    h.length < 2 ? '0' : ''
+  }${
+    h
+  }:${
+    m.length < 2 ? '0' : ''
+  }${
+    m
+  }`
+}
+
 /**
  * Class to convert FIPHR input data into intermediate Tidepool-like format & back
  */
@@ -100,7 +116,7 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     const d = moment.parseZone(sourceData.effectiveDateTime);
     entry._timestamp = d.valueOf();
     entry._timezoneOffset = d.utcOffset();
-    entry._ISODate = d.toISOString(false);
+    entry._ISODate = d.toISOString();
 
     return entry;
   }
@@ -175,7 +191,13 @@ export class FIPHRDataProcessor extends DataFormatConverter {
     let entry = sourceData; //_.cloneDeep(sourceData);
 
     entry.patientId = patientReference;
-    const time = moment(sourceData.time).utcOffset(sourceData.timezoneOffset);
+    // This does not set the correct UTC offset, rather the local timezone.
+    // See https://momentjs.com/guides/#/parsing/
+    const parsedTime = moment.utc(sourceData.time);
+    const adjustedTime = parsedTime.clone().add(sourceData.timezoneOffset, 'minutes');
+    const timeString = adjustedTime.toISOString().replace('Z', toTimezone(sourceData.timezoneOffset));
+    const time = moment.parseZone(timeString);
+
     entry.time_fhir = time.toISOString(true);
 
     entry.issued = new Date().toISOString();

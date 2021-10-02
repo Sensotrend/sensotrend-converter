@@ -24,7 +24,14 @@ export default class FiphrConvert {
     let entry = sourceData; //_.cloneDeep(sourceData);
 
     entry.patientId = patientReference;
-    const time = moment(sourceData.time).utcOffset(sourceData.timezoneOffset);
+
+    // This does not set the correct UTC offset, rather the local timezone.
+    // const time = moment(sourceData.time).utcOffset(sourceData.timezoneOffset, true);
+    const parsedTime = moment.utc(sourceData.time); // .utcOffset(sourceData.timezoneOffset, true);
+    const adjustedTime = parsedTime.clone().add(sourceData.timezoneOffset, 'minutes');
+    const timeString = adjustedTime.toISOString().replace('Z', toTimezone(sourceData.timezoneOffset));
+    const time = moment.parseZone(timeString);
+
     entry.time_fhir = time.toISOString(true);
 
     entry.issued = new Date().toISOString();
