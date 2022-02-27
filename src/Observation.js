@@ -131,14 +131,14 @@ const units = {
 };
 
 export default class Observation {
-  constructor(patient, time, type, amount) {
+  constructor(patient, time, type, amount, device, language) {
     this.resourceType = 'Observation';
     this.meta = {};
     this.type = type;
     // For Kanta PHR
     switch (type) {
       case carbsEst:
-        this.meta.profiles = ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake'];
+        this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake'];
         break;
       case sgvMgdl:
       case smbgMgdl:
@@ -148,7 +148,7 @@ export default class Observation {
         // falls through
       case sgvMmol:
       case smbgMmol:
-        this.meta.profiles = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
+        this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
         break;
       default:
     }
@@ -161,7 +161,7 @@ export default class Observation {
     this.effectiveDateTime = time;
     this.valueQuantity = {
       value: amount,
-      ...units[type],
+      ...units[this.type],
     };
     this.subject = {
       reference: `Patient/${patient}`,
@@ -171,7 +171,8 @@ export default class Observation {
         reference: `Patient/${patient}`,
       },
     ];
-    this.language = 'fi';
+    this.device = device;
+    this.language = language || 'fi';
   }
 
   toString() {
@@ -234,7 +235,7 @@ export default class Observation {
       contained,
       extension,
       modifierExtension,
-      identifier = generateIdentifier(this),
+      identifier = [generateIdentifier(this)],
       // basedOn,
       // partOf,
       status = 'final',

@@ -35,7 +35,10 @@ export function generateIdentifier(resource) {
       || valueInteger || valueRange || valueRatio || valueSampledData || valueTime || valueDateTime
       || valuePeriod)
   }`;
-  return uuidv5(string, NAMESPACE);
+  return {
+    "system": "urn:ietf:rfc:3986",
+    "value": uuidv5(string, NAMESPACE),
+  };
 }
 
 export const l10n = Object.freeze({

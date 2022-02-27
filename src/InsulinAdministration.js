@@ -70,7 +70,7 @@ const coding = {
 };
 
 export default class InsulinAdministration {
-  constructor(patient, time, type, amount) {
+  constructor(patient, time, type, amount, device, language) {
     this.resourceType = 'MedicationAdministration';
     this.patient = patient;
     if (Array.isArray(time)) {
@@ -93,7 +93,8 @@ export default class InsulinAdministration {
     this.subject = {
       reference: `Patient/${patient}`,
     };
-    this.language = 'fi';
+    this.device = device;
+    this.language = language || 'fi';
   }
 
   toString() {
@@ -187,7 +188,7 @@ export default class InsulinAdministration {
       contained,
       extension,
       modifierExtension,
-      identifier = generateIdentifier(this),
+      identifier = [generateIdentifier(this)],
       // definition,
       // instantiates
       // partOf,
