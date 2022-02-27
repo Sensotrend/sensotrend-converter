@@ -1,7 +1,7 @@
-import InsulinAdministration, { shortActing, longActing } from './InsulinAdministration.js';
+import InsulinAdministration, { shortActing, longActing } from './src/InsulinAdministration.js';
 import Observation, {
   carbsEst, sgvMgdl, sgvMmol, smbgMgdl, smbgMmol,
-} from './Observation.js';
+} from './src/Observation.js';
 
 const dose1 = new InsulinAdministration('FooPatient', new Date().toISOString(), shortActing, 5.0);
 
