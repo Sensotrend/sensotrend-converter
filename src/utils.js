@@ -36,8 +36,8 @@ export function generateIdentifier(resource) {
       || valuePeriod)
   }`;
   return {
-    "system": "urn:ietf:rfc:3986",
-    "value": uuidv5(string, NAMESPACE),
+    system: 'urn:ietf:rfc:3986',
+    value: uuidv5(string, NAMESPACE),
   };
 }
 
@@ -70,6 +70,12 @@ export const l10n = Object.freeze({
 
 function pad(i) {
   return `${i < 10 ? '0' : ''}${i}`;
+}
+
+export function adjustTime(time, timezoneOffset) {
+  const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
+  const offsetMinutes = Math.abs(timezoneOffset % 60);
+  return time.replace('Z', `${timezoneOffset >= 0 ? '+' : '-'}${pad(offsetHours)}${pad(offsetMinutes)}`);
 }
 
 export function formatTime(time) {

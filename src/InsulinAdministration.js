@@ -1,5 +1,9 @@
 import {
-  formatPeriod, formatTime, generateIdentifier, l10n as l10nCore,
+  adjustTime,
+  formatPeriod,
+  formatTime,
+  generateIdentifier,
+  l10n as l10nCore,
 } from './utils.js';
 
 export const [shortActing, longActing] = ['shortActing', 'longActing'];
@@ -70,31 +74,106 @@ const coding = {
 };
 
 export default class InsulinAdministration {
-  constructor(patient, time, type, amount, device, language) {
+  constructor(patient, entry, language) {
+    const {
+      time,
+      timezoneOffset,
+      type,
+      rate,
+      duration,
+      normal,
+      deviceId,
+    } = entry;
     this.resourceType = 'MedicationAdministration';
-    this.patient = patient;
-    if (Array.isArray(time)) {
+    const adjustedTime = adjustTime(time, timezoneOffset);
+    if (duration) {
       this.effectivePeriod = {
-        start: time[0],
-        end: time[time.length - 1],
+        start: adjustedTime,
+        end: new Date(new Date(adjustedTime).getTime() + duration).toISOString(),
       };
     } else {
-      this.effectiveDateTime = time;
+      this.effectiveDateTime = adjustedTime;
     }
-    this.type = type;
+
     this.dosage = {
       dose: {
-        value: amount,
+        value: normal || ((rate * duration) / (60 * 60 * 1000)),
         unit: 'IU',
         system: 'http://unitsofmeasure.org',
         code: '[iU]',
       },
     };
+
+    switch (type) {
+      case 'basal':
+        this.dosage.rateRatio = {
+          numerator: {
+            value: rate,
+            unit: 'IU',
+            system: 'http://unitsofmeasure.org',
+            code: '[iU]',
+          },
+          denominator: {
+            unit: 'h',
+            system: 'http://unitsofmeasure.org',
+            code: 'h',
+          },
+        };
+        // falls through
+      case 'bolus':
+        this.type = shortActing;
+        break;
+      case 'long':
+        this.type = longActing;
+        break;
+      default:
+        throw new Error(`Invalid type ${type}`);
+    }
+
+    this.language = language || 'fi';
+
+    this.dosage.text = `${
+      l10n[this.type][this.language]
+    } ${
+      this.dosage.dose.value.toFixed(2)
+    } ${
+      this.dosage.dose.unit
+    }${
+      this.dosage.rateRatio
+        ? ` (${
+          this.dosage.rateRatio.numerator.comparator || ''
+        }${
+          this.dosage.rateRatio.numerator.value || ''
+        } ${
+          this.dosage.rateRatio.numerator.unit || ''
+        }/${
+          this.dosage.rateRatio.denominator.comparator || ''
+        }${
+          (this.dosage.rateRatio.denominator.value
+          && (this.dosage.rateRatio.denominator.value !== 1))
+            ? `${this.dosage.rateRatio.denominator.value} `
+            : ''
+        }${
+          this.dosage.rateRatio.denominator.unit || ''
+        })`
+        : ''
+    }${this.dosage.rateQuantity
+      ? ` (${
+        this.dosage.rateQuantity.comparator || ''
+      }${
+        this.dosage.rateQuantity.value
+      }${
+        this.dosage.rateQuantity.unit
+          ? ` ${this.dosage.rateQuantity.unit}`
+          : ''
+      })`
+      : ''
+    }`;
+
     this.subject = {
       reference: `Patient/${patient}`,
     };
-    this.device = device;
-    this.language = language || 'fi';
+    this.device = { display: deviceId };
   }
 
   toString() {
@@ -131,41 +210,7 @@ export default class InsulinAdministration {
       }${
         this.dosage
           ? `<br />${
-            l10n.dose[this.language]
-          }${
-            this.dosage.dose.value
-          } ${
-            this.dosage.dose.unit
-          }${
-            this.dosage.rateRatio
-              ? ` (${
-                this.dosage.rateRatio.numerator.comparator || ''
-              }${
-                this.dosage.rateRatio.numerator.value || ''
-              } ${
-                this.dosage.rateRatio.numerator.unit || ''
-              }/${
-                this.dosage.rateRatio.denominator.comparator || ''
-              }${
-                (this.dosage.rateRatio.denominator.value
-                && (this.dosage.rateRatio.denominator.value !== 1))
-                  ? `${this.dosage.rateRatio.denominator.value} `
-                  : ''
-              }${
-                this.dosage.rateRatio.denominator.unit || ''
-              })`
-              : ''
-          }${this.dosage.rateQuantity
-            ? ` (${
-              this.dosage.rateQuantity.comparator || ''
-            }${
-              this.dosage.rateQuantity.value
-            }${
-              this.dosage.rateQuantity.unit
-                ? ` ${this.dosage.rateQuantity.unit}`
-                : ''
-            })`
-            : ''
+            this.dosage.text
           }`
           : ''
       }${

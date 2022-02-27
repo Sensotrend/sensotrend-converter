@@ -1,4 +1,5 @@
 import {
+  adjustTime,
   formatPeriod,
   formatTime,
   generateIdentifier,
@@ -6,41 +7,23 @@ import {
   mgdl2mmoll,
 } from './utils.js';
 
-export const [
-  carbsEst,
-  sgvMgdl,
-  sgvMmol,
-  smbgMgdl,
-  smbgMmol,
-] = ['carbsEst', 'sgvMgdl', 'sgvMmol', 'smbgMgdl', 'smbgMmol'];
+export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg', 'wizard'];
 
 const l10n = {
   ...l10nCore,
-  [carbsEst]: {
+  [wizard]: {
     de: 'Geschätzte Kohlenhydrataufnahme: ',
     en: 'Estimated carbohydrate intake: ',
     fi: 'Arvioitu hiilihydraattimäärä: ',
     sv: 'Beräknad mängd kolhydratintag: ',
   },
-  [sgvMgdl]: {
+  [cbg]: {
     de: 'Gewebezucker: ',
     en: 'Glucose in body fluid: ',
     fi: 'Kudossokeri: ',
     sv: 'Vävnadssocker: ',
   },
-  [sgvMmol]: {
-    de: 'Gewebezucker: ',
-    en: 'Glucose in body fluid: ',
-    fi: 'Kudossokeri: ',
-    sv: 'Vävnadssocker: ',
-  },
-  [smbgMgdl]: {
-    de: 'Blutzucker: ',
-    en: 'Blood glucose: ',
-    fi: 'Verensokeri: ',
-    sv: 'Blodsocker: ',
-  },
-  [smbgMmol]: {
+  [smbg]: {
     de: 'Blutzucker: ',
     en: 'Blood glucose: ',
     fi: 'Verensokeri: ',
@@ -55,75 +38,69 @@ const l10n = {
 };
 
 const coding = {
-  [carbsEst]: [
+  [wizard]: [
     {
       system: 'http://loinc.org',
       code: '9059-7',
       display: 'Carbohydrate intake Estimated',
     },
   ],
-  [sgvMgdl]: [
-    {
-      system: 'http://loinc.org',
-      code: '2344-0',
-      display: 'Glucose [Mass/volume] in Body fluid',
-    },
-  ],
-  [sgvMmol]: [
-    {
-      system: 'http://loinc.org',
-      code: '14745-4',
-      display: 'Glucose [Moles/volume] in Body fluid',
-    },
-  ],
-  [smbgMgdl]: [
-    {
-      system: 'http://loinc.org',
-      code: '41653-7',
-      display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
-    },
-    {
-      system: 'http://loinc.org',
-      code: '2339-0',
-      display: 'Glucose [Mass/volume] in Blood',
-    },
-  ],
-  [smbgMmol]: [
-    {
-      system: 'http://loinc.org',
-      code: '14743-9',
-      display: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
-    },
-    {
-      system: 'http://loinc.org',
-      code: '15074-8',
-      display: 'Glucose [Moles/volume] in Blood',
-    },
-  ],
+  [cbg]: {
+    [mgdl]: [
+      {
+        system: 'http://loinc.org',
+        code: '2344-0',
+        display: 'Glucose [Mass/volume] in Body fluid',
+      },
+    ],
+    [mmoll]: [
+      {
+        system: 'http://loinc.org',
+        code: '14745-4',
+        display: 'Glucose [Moles/volume] in Body fluid',
+      },
+    ],
+  },
+  [smbg]: {
+    [mgdl]: [
+      {
+        system: 'http://loinc.org',
+        code: '41653-7',
+        display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
+      },
+      {
+        system: 'http://loinc.org',
+        code: '2339-0',
+        display: 'Glucose [Mass/volume] in Blood',
+      },
+    ],
+    [mmoll]: [
+      {
+        system: 'http://loinc.org',
+        code: '14743-9',
+        display: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+      },
+      {
+        system: 'http://loinc.org',
+        code: '15074-8',
+        display: 'Glucose [Moles/volume] in Blood',
+      },
+    ],
+  },
 };
 
-const units = {
-  [carbsEst]: {
+const unit = {
+  g: {
     unit: 'g',
     system: 'http://unitsofmeasure.org',
     code: 'g',
   },
-  [sgvMgdl]: {
+  [mgdl]: {
     unit: 'mg/dL',
     system: 'http://unitsofmeasure.org',
     code: 'mg/dL',
   },
-  [sgvMmol]: {
-    unit: 'mmol/l',
-    system: 'http://unitsofmeasure.org',
-    code: 'mmol/L',
-  },
-  [smbgMgdl]: {
-    unit: 'mg/dL',
-    system: 'http://unitsofmeasure.org',
-    code: 'mg/dL',
-  },
-  [smbgMmol]: {
+  [mmoll]: {
     unit: 'mmol/l',
     system: 'http://unitsofmeasure.org',
     code: 'mmol/L',
@@ -131,38 +108,59 @@ const units = {
 };
 
 export default class Observation {
-  constructor(patient, time, type, amount, device, language) {
+  constructor(patient, entry, language) {
+    const {
+      time,
+      timezoneOffset,
+      type,
+      value,
+      carbInput,
+      device,
+      units,
+    } = entry;
+
     this.resourceType = 'Observation';
     this.meta = {};
-    this.type = type;
-    // For Kanta PHR
+
     switch (type) {
-      case carbsEst:
+      case wizard:
         this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake'];
+        this.code = {
+          coding: coding[wizard],
+          text: l10n[type][this.language],
+        };
+        this.valueQuantity = {
+          value: carbInput,
+          ...unit.g,
+        };
         break;
-      case sgvMgdl:
-      case smbgMgdl:
-        // convert
-        // eslint-disable-next-line no-param-reassign
-        amount = mgdl2mmoll(amount);
+      case cbg:
+        this.code = {
+          // coding: coding[cbg][units],
+          coding: coding[cbg][mmoll],
+          text: l10n[type][this.language],
+        };
         // falls through
-      case sgvMmol:
-      case smbgMmol:
+      case smbg:
+        this.code = this.code || {
+          // coding: coding[smbg][units],
+          coding: coding[smbg][mmoll],
+          text: l10n[type][this.language],
+        };
+        this.valueQuantity = {
+          // value,
+          value: (units === mgdl) ? mgdl2mmoll(value) : value,
+          // ...unit[units],
+          ...unit[mmoll],
+        };
         this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
         break;
       default:
-    }
-    if (type === sgvMgdl) {
-      this.type = sgvMmol;
-    } else if (type === smbgMgdl) {
-      this.type = smbgMmol;
+        this.code = { coding: [{ code: '??', display: type }] };
     }
     this.patient = patient;
-    this.effectiveDateTime = time;
-    this.valueQuantity = {
-      value: amount,
-      ...units[this.type],
-    };
+    this.effectiveDateTime = adjustTime(time, timezoneOffset);
+
     this.subject = {
       reference: `Patient/${patient}`,
     };
@@ -186,7 +184,7 @@ export default class Observation {
         `${
           l10n.code[this.language]
         }${
-          coding[this.type].map((c) => `${
+          this.code.coding.map((c) => `${
             c.system === 'http://loinc.org' ? 'LOINC ' : ''
           }${
             c.code
@@ -205,7 +203,7 @@ export default class Observation {
       }${
         this.valueQuantity
           ? `<br />${
-            l10n[this.type][this.language] || l10n.result[this.language]
+            this.code.text || l10n.result[this.language]
           }${
             this.valueQuantity.comparator || ''
           }${
