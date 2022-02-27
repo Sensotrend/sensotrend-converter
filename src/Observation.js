@@ -1,3 +1,4 @@
+import { defaultLanguage, fixedUnit } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -5,6 +6,7 @@ import {
   generateIdentifier,
   l10n as l10nCore,
   mgdl2mmoll,
+  mmoll2mgdl,
 } from './utils.js';
 
 export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg', 'wizard'];
@@ -12,28 +14,28 @@ export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg
 const l10n = {
   ...l10nCore,
   [wizard]: {
-    de: 'Geschätzte Kohlenhydrataufnahme: ',
-    en: 'Estimated carbohydrate intake: ',
-    fi: 'Arvioitu hiilihydraattimäärä: ',
-    sv: 'Beräknad mängd kolhydratintag: ',
+    de: 'Geschätzte Kohlenhydrataufnahme',
+    en: 'Estimated carbohydrate intake',
+    fi: 'Arvioitu hiilihydraattimäärä',
+    sv: 'Beräknad mängd kolhydratintag',
   },
   [cbg]: {
-    de: 'Gewebezucker: ',
-    en: 'Glucose in body fluid: ',
-    fi: 'Kudossokeri: ',
-    sv: 'Vävnadssocker: ',
+    de: 'Gewebezucker',
+    en: 'Glucose in body fluid',
+    fi: 'Kudossokeri',
+    sv: 'Vävnadssocker',
   },
   [smbg]: {
-    de: 'Blutzucker: ',
-    en: 'Blood glucose: ',
-    fi: 'Verensokeri: ',
-    sv: 'Blodsocker: ',
+    de: 'Blutzucker',
+    en: 'Blood glucose',
+    fi: 'Verensokeri',
+    sv: 'Blodsocker',
   },
   result: {
-    de: 'Resultat: ',
-    en: 'Result: ',
-    fi: 'Tulos: ',
-    sv: 'Resultat: ',
+    de: 'Resultat',
+    en: 'Result',
+    fi: 'Tulos',
+    sv: 'Resultat',
   },
 };
 
@@ -107,6 +109,16 @@ const unit = {
   },
 };
 
+function fixValue(value, units) {
+  if ((fixedUnit === mmoll) && (units === mgdl)) {
+    return mgdl2mmoll(value);
+  }
+  if ((fixedUnit === mgdl) && (units === mmoll)) {
+    return mmoll2mgdl(value);
+  }
+  return value;
+}
+
 export default class Observation {
   constructor(patient, entry, language) {
     const {
@@ -121,6 +133,7 @@ export default class Observation {
 
     this.resourceType = 'Observation';
     this.meta = {};
+    this.language = language || defaultLanguage;
 
     switch (type) {
       case wizard:
@@ -136,27 +149,22 @@ export default class Observation {
         break;
       case cbg:
         this.code = {
-          // coding: coding[cbg][units],
-          coding: coding[cbg][mmoll],
+          coding: coding[cbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
         // falls through
       case smbg:
         this.code = this.code || {
-          // coding: coding[smbg][units],
-          coding: coding[smbg][mmoll],
+          coding: coding[smbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {
-          // value,
-          value: (units === mgdl) ? mgdl2mmoll(value) : value,
-          // ...unit[units],
-          ...unit[mmoll],
+          value: fixValue(value, units),
+          ...unit[fixedUnit || units],
         };
         this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
         break;
       default:
-        this.code = { coding: [{ code: '??', display: type }] };
     }
     this.patient = patient;
     this.effectiveDateTime = adjustTime(time, timezoneOffset);
@@ -170,7 +178,6 @@ export default class Observation {
       },
     ];
     this.device = device;
-    this.language = language || 'fi';
   }
 
   toString() {
@@ -204,7 +211,7 @@ export default class Observation {
         this.valueQuantity
           ? `<br />${
             this.code.text || l10n.result[this.language]
-          }${
+          }: ${
             this.valueQuantity.comparator || ''
           }${
             this.valueQuantity.value

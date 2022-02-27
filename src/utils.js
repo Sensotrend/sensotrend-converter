@@ -100,3 +100,7 @@ export function formatPeriod(period) {
 export function mgdl2mmoll(value) {
   return Math.round((value / GLUCOSE_MOLAR_MASS) * 100) / 100;
 }
+
+export function mmoll2mgdl(value) {
+  return parseFloat((value * GLUCOSE_MOLAR_MASS).toFixed(2));
+}

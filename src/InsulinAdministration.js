@@ -1,3 +1,4 @@
+import { defaultLanguage } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -89,7 +90,10 @@ export default class InsulinAdministration {
     if (duration) {
       this.effectivePeriod = {
         start: adjustedTime,
-        end: new Date(new Date(adjustedTime).getTime() + duration).toISOString(),
+        end: adjustTime(
+          new Date(new Date(adjustedTime).getTime() + duration).toISOString(),
+          timezoneOffset,
+        ),
       };
     } else {
       this.effectiveDateTime = adjustedTime;
@@ -130,7 +134,7 @@ export default class InsulinAdministration {
         throw new Error(`Invalid type ${type}`);
     }
 
-    this.language = language || 'fi';
+    this.language = language || defaultLanguage;
 
     this.dosage.text = `${
       l10n[this.type][this.language]
@@ -143,13 +147,15 @@ export default class InsulinAdministration {
         ? ` (${
           this.dosage.rateRatio.numerator.comparator || ''
         }${
-          this.dosage.rateRatio.numerator.value || ''
+          (this.dosage.rateRatio.numerator.value !== undefined)
+          ? this.dosage.rateRatio.numerator.value
+          : ''
         } ${
           this.dosage.rateRatio.numerator.unit || ''
         }/${
           this.dosage.rateRatio.denominator.comparator || ''
         }${
-          (this.dosage.rateRatio.denominator.value
+          ((this.dosage.rateRatio.denominator.value !== undefined)
           && (this.dosage.rateRatio.denominator.value !== 1))
             ? `${this.dosage.rateRatio.denominator.value} `
             : ''
