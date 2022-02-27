@@ -27,7 +27,7 @@ data.forEach((d) => {
     case 'wizard':
       bundle.entry.push(new Observation(patient, d));
       break;
-    case 'wizard':
+    case 'deviceEvent':
       // ignore for now...
       break;
     default:
