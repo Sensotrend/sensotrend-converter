@@ -132,7 +132,7 @@ const units = {
 
 export default class Observation {
   constructor(patient, time, type, amount) {
-    this.resourceType = 'Observation',
+    this.resourceType = 'Observation';
     this.meta = {};
     this.type = type;
     // For Kanta PHR
@@ -143,17 +143,19 @@ export default class Observation {
       case sgvMgdl:
       case smbgMgdl:
         // convert
+        // eslint-disable-next-line no-param-reassign
         amount = mgdl2mmoll(amount);
-        // Flow to next
+        // falls through
       case sgvMmol:
       case smbgMmol:
         this.meta.profiles = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
         break;
+      default:
     }
     if (type === sgvMgdl) {
-      type = sgvMmol;
-    } else if (type == smbgMgdl) {
-      type = smbgMmol;
+      this.type = sgvMmol;
+    } else if (type === smbgMgdl) {
+      this.type = smbgMmol;
     }
     this.patient = patient;
     this.effectiveDateTime = time;
@@ -194,9 +196,11 @@ export default class Observation {
       }${
         this.effectivePeriod
           ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
-          : this.effectiveDateTime
-            ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
-            : ''
+          : ''
+      }${
+        this.effectiveDateTime
+          ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
+          : ''
       }${
         this.valueQuantity
           ? `<br />${
@@ -231,19 +235,19 @@ export default class Observation {
       extension,
       modifierExtension,
       identifier = generateIdentifier(this),
-      basedOn,
-      partOf,
+      // basedOn,
+      // partOf,
       status = 'final',
       category,
       code,
       subject,
-      context,
-      focus,
-      encounter,
+      // context,
+      // focus,
+      // encounter,
       effectiveDateTime,
-      effectivePeriod,
-      effectiveTiming,
-      effectiveInstant,
+      // effectivePeriod,
+      // effectiveTiming,
+      // effectiveInstant,
       issued = new Date().toISOString(),
       performer,
       valueQuantity,
@@ -260,14 +264,14 @@ export default class Observation {
       interpretation,
       note,
       comment,
-      bodySite,
-      method,
-      specimen,
-      device,
+      // bodySite,
+      // method,
+      // specimen,
+      // device,
       referenceRange,
-      related,
-      hasMember,
-      derivedFrom,
+      // related,
+      // hasMember,
+      // derivedFrom,
       component,
     } = this;
 

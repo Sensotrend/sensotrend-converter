@@ -71,7 +71,7 @@ const coding = {
 
 export default class InsulinAdministration {
   constructor(patient, time, type, amount) {
-    this.resourceType = 'MedicationAdministration',
+    this.resourceType = 'MedicationAdministration';
     this.patient = patient;
     if (Array.isArray(time)) {
       this.effectivePeriod = {
@@ -122,9 +122,11 @@ export default class InsulinAdministration {
       }${
         this.effectivePeriod
           ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
-          : this.effectiveDateTime
-            ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
-            : ''
+          : ''
+      }${
+        this.effectiveDateTime
+          ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
+          : ''
       }${
         this.dosage
           ? `<br />${

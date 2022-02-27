@@ -89,20 +89,5 @@ export function formatPeriod(period) {
 }
 
 export function mgdl2mmoll(value) {
-  return Math.round((value / 18.0156) * 100) / 100;
+  return Math.round((value / GLUCOSE_MOLAR_MASS) * 100) / 100;
 }
-
-/*
-export class value {
-  constructor(value, precision = 2) {
-    this.value = value;
-    this.precision = precision;
-  }
-  toJSON() {
-    return this.toString();
-  }
-  toString() {
-    return this.value?.toFixed(this.precision);
-  }
-}
-*/
