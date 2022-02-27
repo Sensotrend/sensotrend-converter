@@ -35,8 +35,8 @@ export function generateIdentifier(resource) {
       || valueInteger || valueRange || valueRatio || valueSampledData || valueTime || valueDateTime
       || valuePeriod)
   }`;
-  return uuidv5(string, NAMESPACE);  
-};
+  return uuidv5(string, NAMESPACE);
+}
 
 export const l10n = Object.freeze({
   code: Object.freeze({
@@ -106,6 +106,3 @@ export class value {
   }
 }
 */
-
-
-

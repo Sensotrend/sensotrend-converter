@@ -4,7 +4,7 @@ import {
   generateIdentifier,
   l10n as l10nCore,
   mgdl2mmoll,
-} from "./utils.js";
+} from './utils.js';
 
 export const [
   carbsEst,
@@ -13,7 +13,6 @@ export const [
   smbgMgdl,
   smbgMmol,
 ] = ['carbsEst', 'sgvMgdl', 'sgvMmol', 'smbgMgdl', 'smbgMmol'];
-
 
 const l10n = {
   ...l10nCore,
@@ -52,7 +51,7 @@ const l10n = {
     en: 'Result: ',
     fi: 'Tulos: ',
     sv: 'Resultat: ',
-  }
+  },
 };
 
 const coding = {
@@ -137,7 +136,7 @@ export default class Observation {
     this.meta = {};
     this.type = type;
     // For Kanta PHR
-    switch(type) {
+    switch (type) {
       case carbsEst:
         this.meta.profiles = ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake'];
         break;
@@ -168,7 +167,7 @@ export default class Observation {
     this.performer = [
       {
         reference: `Patient/${patient}`,
-      }
+      },
     ];
     this.language = 'fi';
   }
@@ -184,7 +183,7 @@ export default class Observation {
         `${
           l10n.code[this.language]
         }${
-          coding[this.type].map(c => `${
+          coding[this.type].map((c) => `${
             c.system === 'http://loinc.org' ? 'LOINC ' : ''
           }${
             c.code
@@ -194,28 +193,28 @@ export default class Observation {
         }`
       }${
         this.effectivePeriod
-        ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
-        : this.effectiveDateTime
-          ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
-          : ''
+          ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
+          : this.effectiveDateTime
+            ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
+            : ''
       }${
         this.valueQuantity
-        ? `<br />${
-          l10n[this.type][this.language] || l10n.result[this.language]
-        }${
-          this.valueQuantity.comparator || ''
-        }${
-          this.valueQuantity.value
-        }${
-          this.valueQuantity.unit
-          ? ` ${this.valueQuantity.unit}`
+          ? `<br />${
+            l10n[this.type][this.language] || l10n.result[this.language]
+          }${
+            this.valueQuantity.comparator || ''
+          }${
+            this.valueQuantity.value
+          }${
+            this.valueQuantity.unit
+              ? ` ${this.valueQuantity.unit}`
+              : ''
+          }`
           : ''
-        }`
-        : ''
       }${
         this.device
-        ? `<br />${l10n.device[this.language]}${this.device.display}`
-        : ''
+          ? `<br />${l10n.device[this.language]}${this.device.display}`
+          : ''
       }</div>`,
     };
   }
@@ -324,4 +323,4 @@ export default class Observation {
       component,
     };
   }
-};
+}

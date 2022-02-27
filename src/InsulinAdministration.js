@@ -1,6 +1,8 @@
-import { formatPeriod, formatTime, generateIdentifier, l10n as l10nCore } from "./utils.js";
+import {
+  formatPeriod, formatTime, generateIdentifier, l10n as l10nCore,
+} from './utils.js';
 
-export const [ shortActing, longActing ] = ['shortActing', 'longActing'];
+export const [shortActing, longActing] = ['shortActing', 'longActing'];
 
 const l10n = {
   ...l10nCore,
@@ -65,7 +67,7 @@ const coding = {
       display: 'Insulin (substance)',
     },
   ],
-}
+};
 
 export default class InsulinAdministration {
   constructor(patient, time, type, amount) {
@@ -75,7 +77,7 @@ export default class InsulinAdministration {
       this.effectivePeriod = {
         start: time[0],
         end: time[time.length - 1],
-      }
+      };
     } else {
       this.effectiveDateTime = time;
     }
@@ -109,7 +111,7 @@ export default class InsulinAdministration {
         }<br />${
           l10n.code[this.language]
         }${
-          coding[this.type].map(c => `${
+          coding[this.type].map((c) => `${
             c.system === 'http://snomed.info/sct' ? 'SNOMED ' : ''
           }${
             c.code
@@ -119,54 +121,54 @@ export default class InsulinAdministration {
         }`
       }${
         this.effectivePeriod
-        ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
-        : this.effectiveDateTime
-          ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
-          : ''
+          ? `<br />${l10n.time[this.language]}${formatPeriod(this.effectivePeriod)}`
+          : this.effectiveDateTime
+            ? `<br />${l10n.time[this.language]}${formatTime(this.effectiveDateTime)}`
+            : ''
       }${
         this.dosage
-        ? `<br />${
-          l10n.dose[this.language]
-        }${
-          this.dosage.dose.value
-        } ${
-          this.dosage.dose.unit
-        }${
-          this.dosage.rateRatio
-          ? ` (${
-              this.dosage.rateRatio.numerator.comparator || ''
-            }${
-              this.dosage.rateRatio.numerator.value || ''
-            } ${
-              this.dosage.rateRatio.numerator.unit || ''
-            }/${
-              this.dosage.rateRatio.denominator.comparator || ''
-            }${
-              (this.dosage.rateRatio.denominator.value
+          ? `<br />${
+            l10n.dose[this.language]
+          }${
+            this.dosage.dose.value
+          } ${
+            this.dosage.dose.unit
+          }${
+            this.dosage.rateRatio
+              ? ` (${
+                this.dosage.rateRatio.numerator.comparator || ''
+              }${
+                this.dosage.rateRatio.numerator.value || ''
+              } ${
+                this.dosage.rateRatio.numerator.unit || ''
+              }/${
+                this.dosage.rateRatio.denominator.comparator || ''
+              }${
+                (this.dosage.rateRatio.denominator.value
                 && (this.dosage.rateRatio.denominator.value !== 1))
-              ? `${this.dosage.rateRatio.denominator.value} `
+                  ? `${this.dosage.rateRatio.denominator.value} `
+                  : ''
+              }${
+                this.dosage.rateRatio.denominator.unit || ''
+              })`
               : ''
+          }${this.dosage.rateQuantity
+            ? ` (${
+              this.dosage.rateQuantity.comparator || ''
             }${
-              this.dosage.rateRatio.denominator.unit || ''
+              this.dosage.rateQuantity.value
+            }${
+              this.dosage.rateQuantity.unit
+                ? ` ${this.dosage.rateQuantity.unit}`
+                : ''
             })`
-          : ''
-        }${this.dosage.rateQuantity
-          ? ` (${
-            this.dosage.rateQuantity.comparator || ''
-          }${
-            this.dosage.rateQuantity.value
-          }${
-            this.dosage.rateQuantity.unit
-            ? ` ${this.dosage.rateQuantity.unit}`
             : ''
-          })`
+          }`
           : ''
-        }`
-        : ''
       }${
         this.device
-        ? `<br />${l10n.device[this.language]}${this.device.display}`
-        : ''
+          ? `<br />${l10n.device[this.language]}${this.device.display}`
+          : ''
       }</div>`,
     };
   }
@@ -253,4 +255,4 @@ export default class InsulinAdministration {
       // eventHistory,
     };
   }
-};
+}
