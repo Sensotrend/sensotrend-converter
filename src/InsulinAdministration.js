@@ -148,8 +148,8 @@ export default class InsulinAdministration {
           this.dosage.rateRatio.numerator.comparator || ''
         }${
           (this.dosage.rateRatio.numerator.value !== undefined)
-          ? this.dosage.rateRatio.numerator.value
-          : ''
+            ? this.dosage.rateRatio.numerator.value
+            : ''
         } ${
           this.dosage.rateRatio.numerator.unit || ''
         }/${
