@@ -77,13 +77,14 @@ const coding = {
 export default class InsulinAdministration {
   constructor(patient, entry, language) {
     const {
+      deviceId,
+      payload,
+      duration,
+      normal,
+      rate,
       time,
       timezoneOffset,
       type,
-      rate,
-      duration,
-      normal,
-      deviceId,
     } = entry;
     this.resourceType = 'MedicationAdministration';
     const adjustedTime = adjustTime(time, timezoneOffset);
@@ -107,6 +108,16 @@ export default class InsulinAdministration {
         code: '[iU]',
       },
     };
+
+    if (rate === 0) {
+      this.note = {
+        text: 'Suspended.',
+      };
+    } else if (payload.type) {
+      this.note = {
+        text: payload.type[0],
+      };
+    }
 
     switch (type) {
       case 'basal':

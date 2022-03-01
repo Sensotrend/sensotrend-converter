@@ -122,18 +122,25 @@ function fixValue(value, units) {
 export default class Observation {
   constructor(patient, entry, language) {
     const {
+      carbInput,
+      device,
+      payload,
       time,
       timezoneOffset,
       type,
-      value,
-      carbInput,
-      device,
       units,
+      value,
     } = entry;
 
     this.resourceType = 'Observation';
     this.meta = {};
     this.language = language || defaultLanguage;
+
+    if (payload.type) {
+      this.note = {
+        text: payload.type[0],
+      };
+    }
 
     switch (type) {
       case wizard:
