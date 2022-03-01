@@ -1,4 +1,4 @@
-import { defaultLanguage } from './config.js';
+import { defaultLanguage, kantaRestrictions } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -100,6 +100,13 @@ export default class InsulinAdministration {
       this.effectiveDateTime = adjustedTime;
     }
 
+    this.meta = {
+      profile: [
+        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
+        'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
+      ],
+    };
+
     this.dosage = {
       dose: {
         value: normal || ((rate * duration) / (60 * 60 * 1000)),
@@ -108,16 +115,6 @@ export default class InsulinAdministration {
         code: '[iU]',
       },
     };
-
-    if (rate === 0) {
-      this.note = {
-        text: 'Suspended.',
-      };
-    } else if (payload.type) {
-      this.note = {
-        text: payload.type[0],
-      };
-    }
 
     switch (type) {
       case 'basal':
@@ -240,7 +237,6 @@ export default class InsulinAdministration {
 
   toJSON() {
     const {
-      // Comment out properties that need to be stripped off for restrictive profile (Kanta PHR)
       resourceType,
       id,
       meta,
@@ -251,38 +247,41 @@ export default class InsulinAdministration {
       extension,
       modifierExtension,
       identifier = [generateIdentifier(this)],
-      // definition,
-      // instantiates
-      // partOf,
+      definition,
+      instantiates,
+      partOf,
       status = 'completed',
-      // statusReason,
-      // category,
+      statusReason,
+      category,
       medicationCodeableConcept,
       medicationReference,
       subject,
-      // context,
-      // supportingInformation,
+      context,
+      supportingInformation,
       effectiveDateTime,
       effectivePeriod,
       performer,
-      // notGiven,
-      // reasonNotGiven,
-      // reasonCode,
-      // reasonReference,
-      // prescription,
-      // request,
-      // device,
+      notGiven,
+      reasonNotGiven,
+      reasonCode,
+      reasonReference,
+      prescription,
+      request,
+      device,
       note,
       dosage,
-      // eventHistory,
+      eventHistory,
     } = this;
 
-    return {
+    return kantaRestrictions
+    ? {
       resourceType,
       id,
       meta: {
-        profile: ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3'],
         ...meta,
+        profile: [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
+        ],
       },
       implicitRules,
       language,
@@ -291,33 +290,51 @@ export default class InsulinAdministration {
       extension,
       modifierExtension,
       identifier,
-      // definition,
-      // instantiates
-      // partOf,
       status,
-      // statusReason,
-      // category,
       medicationCodeableConcept,
       medicationReference,
       subject,
-      // context,
-      // supportingInformation,
       effectiveDateTime,
       effectivePeriod,
       performer,
-      // notGiven,
-      // reasonNotGiven,
-      // reasonCode,
-      // reasonReference,
-      // prescription,
-      // request,
-      // device,
       note,
-      dosage: {
-        text: `${l10n[this.type][language]} ${dosage.dose.value} ${dosage.dose.unit}`,
-        ...dosage,
-      },
-      // eventHistory,
+      dosage,
+    }
+    : {
+      resourceType,
+      id,
+      meta,
+      implicitRules,
+      language,
+      text,
+      contained,
+      extension,
+      modifierExtension,
+      identifier,
+      definition,
+      instantiates,
+      partOf,
+      status,
+      statusReason,
+      category,
+      medicationCodeableConcept,
+      medicationReference,
+      subject,
+      context,
+      supportingInformation,
+      effectiveDateTime,
+      effectivePeriod,
+      performer,
+      notGiven,
+      reasonNotGiven,
+      reasonCode,
+      reasonReference,
+      prescription,
+      request,
+      device,
+      note,
+      dosage,
+      eventHistory,
     };
   }
 }

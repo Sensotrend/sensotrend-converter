@@ -1,4 +1,4 @@
-import { defaultLanguage, fixedUnit } from './config.js';
+import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -123,7 +123,7 @@ export default class Observation {
   constructor(patient, entry, language) {
     const {
       carbInput,
-      device,
+      deviceId,
       payload,
       time,
       timezoneOffset,
@@ -136,15 +136,16 @@ export default class Observation {
     this.meta = {};
     this.language = language || defaultLanguage;
 
-    if (payload.type) {
-      this.note = {
-        text: payload.type[0],
-      };
-    }
-
     switch (type) {
       case wizard:
-        this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake'];
+        this.meta.profile = kantaRestrictions
+        ? [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
+        ]
+        : [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
+          'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
+        ];
         this.code = {
           coding: coding[wizard],
           text: l10n[type][this.language],
@@ -169,7 +170,14 @@ export default class Observation {
           value: fixValue(value, units),
           ...unit[fixedUnit || units],
         };
-        this.meta.profile = ['http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3'];
+        this.meta.profile = kantaRestrictions
+        ? [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+        ]
+        : [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+          'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+        ];
         break;
       default:
     }
@@ -184,7 +192,7 @@ export default class Observation {
         reference: `Patient/${patient}`,
       },
     ];
-    this.device = device;
+    this.device = { display: deviceId };
   }
 
   toString() {
@@ -248,19 +256,19 @@ export default class Observation {
       extension,
       modifierExtension,
       identifier = [generateIdentifier(this)],
-      // basedOn,
-      // partOf,
+      basedOn,
+      partOf,
       status = 'final',
       category,
       code,
       subject,
-      // context,
-      // focus,
-      // encounter,
+      context,
+      focus,
+      encounter,
       effectiveDateTime,
-      // effectivePeriod,
-      // effectiveTiming,
-      // effectiveInstant,
+      effectivePeriod,
+      effectiveTiming,
+      effectiveInstant,
       issued = new Date().toISOString(),
       performer,
       valueQuantity,
@@ -277,19 +285,19 @@ export default class Observation {
       interpretation,
       note,
       comment,
-      // bodySite,
-      // method,
-      // specimen,
-      // device,
+      bodySite,
+      method,
+      specimen,
+      device,
       referenceRange,
-      // related,
-      // hasMember,
-      // derivedFrom,
+      related,
+      hasMember,
+      derivedFrom,
       component,
     } = this;
 
-    return {
-      // Comment out properties that need to be stripped off for restrictive profile (Kanta PHR)
+    return kantaRestrictions
+    ? {
       resourceType,
       id,
       meta,
@@ -300,19 +308,11 @@ export default class Observation {
       extension,
       modifierExtension,
       identifier,
-      // basedOn,
-      // partOf,
       status,
       category,
       code,
       subject,
-      // context,
-      // focus,
-      // encounter,
       effectiveDateTime,
-      // effectivePeriod,
-      // effectiveTiming,
-      // effectiveInstant,
       issued,
       performer,
       valueQuantity,
@@ -329,14 +329,57 @@ export default class Observation {
       interpretation,
       note,
       comment,
-      // bodySite,
-      // method,
-      // specimen,
-      // device,
-      // related
       referenceRange,
-      // hasMember,
-      // derivedFrom,
+      component,
+    }
+    : {
+      resourceType,
+      id,
+      meta,
+      implicitRules,
+      language,
+      text,
+      contained,
+      extension,
+      modifierExtension,
+      identifier,
+      basedOn,
+      partOf,
+      status,
+      category,
+      code,
+      subject,
+      context,
+      focus,
+      encounter,
+      effectiveDateTime,
+      effectivePeriod,
+      effectiveTiming,
+      effectiveInstant,
+      issued,
+      performer,
+      valueQuantity,
+      valueCodeableConcept,
+      valueString,
+      valueBoolean,
+      valueRange,
+      valueSampledData,
+      valueAttachment,
+      valueTime,
+      valueDateTime,
+      valuePeriod,
+      dataAbsentReason,
+      interpretation,
+      note,
+      comment,
+      bodySite,
+      method,
+      specimen,
+      device,
+      related,
+      referenceRange,
+      hasMember,
+      derivedFrom,
       component,
     };
   }
