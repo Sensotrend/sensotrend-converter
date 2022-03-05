@@ -73,9 +73,10 @@ function pad(i) {
 }
 
 export function adjustTime(time, timezoneOffset) {
+  const date = new Date(new Date(time).getTime() + (timezoneOffset * 60 * 1000));
   const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
   const offsetMinutes = Math.abs(timezoneOffset % 60);
-  return time.replace('Z', `${timezoneOffset >= 0 ? '+' : '-'}${pad(offsetHours)}${pad(offsetMinutes)}`);
+  return date.toISOString().replace('Z', `${timezoneOffset >= 0 ? '+' : '-'}${pad(offsetHours)}${pad(offsetMinutes)}`);
 }
 
 export function formatTime(time) {
