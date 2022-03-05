@@ -35,4 +35,6 @@ data.forEach((d) => {
   }
 });
 
-console.log(JSON.stringify(bundle));
+console.log(JSON.stringify(bundle, null, 2));
+
+
