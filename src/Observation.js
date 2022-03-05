@@ -181,7 +181,6 @@ export default class Observation {
         break;
       default:
     }
-    this.patient = patient;
     this.effectiveDateTime = adjustTime(time, timezoneOffset);
 
     this.subject = {

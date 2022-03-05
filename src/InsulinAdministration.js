@@ -106,6 +106,13 @@ export default class InsulinAdministration {
     } = entry;
 
     this.resourceType = 'MedicationAdministration';
+    this.meta = {
+      profile: [
+        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
+        'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
+      ],
+    };
+
     this.language = language || defaultLanguage;
 
     const adjustedTime = adjustTime(time, timezoneOffset);
@@ -121,13 +128,6 @@ export default class InsulinAdministration {
       this.effectiveDateTime = adjustedTime;
     }
 
-    this.meta = {
-      profile: [
-        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
-        'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
-      ],
-    };
-
     this.dosage = {
       dose: {
         value: normal || ((rate * duration) / (60 * 60 * 1000)),
@@ -137,6 +137,7 @@ export default class InsulinAdministration {
       },
     };
 
+    let insulinType;
     switch (type) {
       case 'basal':
         if (tbr !== undefined || percentage !== undefined) {
@@ -164,22 +165,22 @@ export default class InsulinAdministration {
         }
         // falls through
       case 'bolus':
-        this.type = shortActing;
+        insulinType = shortActing;
         break;
       case 'long':
-        this.type = longActing;
+        insulinType = longActing;
         break;
       default:
         throw new Error(`Invalid type ${type}`);
     }
 
     this.medicationCodeableConcept = {
-      coding: coding[this.type],
-      text: l10n[this.type][this.language],
+      coding: coding[insulinType],
+      text: l10n[insulinType][this.language],
     };
 
     this.dosage.text = `${
-      l10n[this.type][this.language]
+      l10n[insulinType][this.language]
     } ${
       this.dosage.dose.value.toFixed(2)
     } ${
@@ -237,11 +238,11 @@ export default class InsulinAdministration {
         `${
           l10n.typeOfInsulin[this.language]
         }${
-          l10n[this.type][this.language]
+          this.dosage.text
         }<br />${
           l10n.code[this.language]
         }${
-          coding[this.type].map((c) => `${
+          this.medicationCodeableConcept.coding.map((c) => `${
             c.system === 'http://snomed.info/sct' ? 'SNOMED ' : ''
           }${
             c.code
@@ -314,12 +315,7 @@ export default class InsulinAdministration {
     ? {
       resourceType,
       id,
-      meta: {
-        ...meta,
-        profile: [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
-        ],
-      },
+      meta,
       implicitRules,
       language,
       text,
