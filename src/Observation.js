@@ -182,6 +182,7 @@ export default class Observation {
       default:
     }
     this.effectiveDateTime = adjustTime(time, timezoneOffset);
+    this.issued = adjustTime(new Date().toISOString(), timezoneOffset);
 
     this.subject = {
       reference: `Patient/${patient}`,
@@ -268,7 +269,7 @@ export default class Observation {
       effectivePeriod,
       effectiveTiming,
       effectiveInstant,
-      issued = new Date().toISOString(),
+      issued,
       performer,
       valueQuantity,
       valueCodeableConcept,
