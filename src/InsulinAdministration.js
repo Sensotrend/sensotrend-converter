@@ -81,12 +81,17 @@ export default class InsulinAdministration {
       payload,
       duration,
       normal,
+      percentage,
       rate,
+      tbr,
       time,
       timezoneOffset,
       type,
     } = entry;
+
     this.resourceType = 'MedicationAdministration';
+    this.language = language || defaultLanguage;
+
     const adjustedTime = adjustTime(time, timezoneOffset);
     if (duration) {
       this.effectivePeriod = {
@@ -118,19 +123,29 @@ export default class InsulinAdministration {
 
     switch (type) {
       case 'basal':
-        this.dosage.rateRatio = {
-          numerator: {
+        if (tbr !== undefined || percentage !== undefined) {
+          this.dosage.rateRatio = {
+            numerator: {
+              value: rate,
+              unit: 'IU',
+              system: 'http://unitsofmeasure.org',
+              code: '[iU]',
+            },
+            denominator: {
+              value: 1 / (percentage || tbr),
+              unit: 'h',
+              system: 'http://unitsofmeasure.org',
+              code: 'h',
+            },
+          };
+        } else {
+          this.dosage.rateQuantity = {
             value: rate,
-            unit: 'IU',
+            unit: '[iU]/h',
             system: 'http://unitsofmeasure.org',
-            code: '[iU]',
-          },
-          denominator: {
-            unit: 'h',
-            system: 'http://unitsofmeasure.org',
-            code: 'h',
-          },
-        };
+            code: '[iU]/h',
+          };
+        }
         // falls through
       case 'bolus':
         this.type = shortActing;
@@ -142,7 +157,10 @@ export default class InsulinAdministration {
         throw new Error(`Invalid type ${type}`);
     }
 
-    this.language = language || defaultLanguage;
+    this.medicationCodeableConcept = {
+      coding: coding[this.type],
+      text: l10n[this.type][this.language],
+    };
 
     this.dosage.text = `${
       l10n[this.type][this.language]
@@ -187,7 +205,9 @@ export default class InsulinAdministration {
     this.subject = {
       reference: `Patient/${patient}`,
     };
-    this.device = { display: deviceId };
+    this.device = [
+      { display: deviceId },
+    ];
   }
 
   toString() {
@@ -229,7 +249,8 @@ export default class InsulinAdministration {
           : ''
       }${
         this.device
-          ? `<br />${l10n.device[this.language]}${this.device.display}`
+          ? `<br />${l10n.device[this.language]}${
+            this.device.map((d) => d.display).join(', ')}`
           : ''
       }</div>`,
     };
