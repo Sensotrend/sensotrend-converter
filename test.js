@@ -4,7 +4,11 @@ import http from 'http';
 
 import InsulinAdministration from './src/InsulinAdministration.js';
 import Observation from './src/Observation.js';
-import { stringify } from 'querystring';
+
+/*
+ * RUN THIS TEST AS: 
+ * > node test.js > resultBundle.json
+ */
 
 const require = createRequire(import.meta.url);
 const data = require('./data.json');
@@ -19,65 +23,39 @@ const bundle = {
 };
 
 data.forEach((d) => {
+  let resource;
   switch(d.type) {
     case 'basal':
     case 'bolus':
       // Todo: handle more complex bolus types like extended and square wave
-      bundle.entry.push(new InsulinAdministration(patient, d));
+      resource = new InsulinAdministration(patient, d);
       break;
     case 'cbg':
     case 'smbg':
     case 'wizard':
-      bundle.entry.push(new Observation(patient, d));
+      resource = new Observation(patient, d);
       break;
     case 'deviceEvent':
       // ignore for now...
-      break;
+      return;
     default:
       console.error(`Unhandled type ${d.type}`, d);
+      return;
   }
+  bundle.entry.push({
+    resource,
+    request: {
+      url: `${resource.resourceType}/`,
+      method: 'POST',
+      ifNoneExist: 'identifier=' + resource.identifier[0]?.value,
+    },
+  });
 });
 
 try {
   fs.writeFileSync('./bundle.json', JSON.stringify(bundle, null, 2));
 } catch (err) {
   console.error(err)
-}
-
-// console.log(JSON.stringify(bundle, null, 2));
-
-/*
-const hapiUISafeBundle = {
-  ...bundle,
-  entry: [],
-};
-
-for (let i = 0; i < bundle.entry.length; i += 1) {
-  const e = bundle.entry[i];
-  if ((JSON.stringify(hapiUISafeBundle).length + JSON.stringify(e).length) > 5000) {
-    // HAPI UI has a limit of 200000 bytes for form data length
-    // We leave some space for other form data and encoding
-    break;
-  }
-  hapiUISafeBundle.entry.push(e);
-}
-
-console.log(JSON.stringify(hapiUISafeBundle));
-*/
-
-const hapiSafeBundle = {
-  ...bundle,
-  entry: [],
-};
-
-for (let i = 0; i < bundle.entry.length; i += 1) {
-  const e = bundle.entry[i];
-  if ((JSON.stringify(hapiSafeBundle).length + JSON.stringify(e).length) > 150000) {
-    // HAPI UI has a limit of 200000 bytes for form data length
-    // We leave some space for other form data and encoding
-    break;
-  }
-  hapiSafeBundle.entry.push(JSON.parse(JSON.stringify(e)));
 }
 
 const postOptions = {
@@ -92,9 +70,14 @@ const postOptions = {
 
 function postEntry(e) {
   let responseChunks = [];
+  const isBatchBundle = (e.resourceType === 'Bundle') && (e.type === 'batch');
   const request = http.request({
     ...postOptions,
-    path: `${postOptions.path}/${e.resourceType}`,
+    path: `${postOptions.path}/${
+      isBatchBundle
+      ? '' // Post batch Bundles to the root.
+      : e.resourceType
+    }`,
   }, function(res) {
     res.setEncoding('utf8');
     res.on('data', function(chunk) {
@@ -111,12 +94,17 @@ function postEntry(e) {
         case 'application/json':
         case 'application/fhir+json':
             const stored = JSON.parse(resBody);
-            const jsonied = JSON.parse(JSON.stringify(e));
-            Object.keys(jsonied).forEach((k) => {
-              if (stored[k] === undefined) {
-                console.error('Not stored', { [k]: e[k] }, mimeType);
-              }
-            });
+            if (isBatchBundle) {
+              // TODO: diff with the sent bundle
+              console.log(JSON.stringify(stored, null, 2));
+            } else {
+              const jsonied = JSON.parse(JSON.stringify(e));
+              Object.keys(jsonied).forEach((k) => {
+                if (stored[k] === undefined) {
+                  console.error('Not stored', { [k]: e[k] }, mimeType);
+                }
+              });
+            }
           break;
         default:
           console.error('Not parsing', contentType, resBody);
@@ -133,16 +121,19 @@ function postEntry(e) {
 
 const postedKeys = {};
 
-// bundle.entry.forEach(postEntry);
+postEntry(bundle);
+
+// bundle.entry.forEach((e) => postEntry(e.resource));
 
 bundle.entry.forEach((e) => {
+  const { resource } = e;
   const keys = [
-    ...Object.keys(e),
-    ...(e.code?.coding || []).map(c => `code ${c.code || c.display || JSON.stringify(c)}`),
+    ...Object.keys(resource),
+    ...(resource.code?.coding || []).map(c => `code ${c.code || c.display || JSON.stringify(c)}`),
     ...Object.keys(e.dosage || {})
   ].join();
   if (!postedKeys[keys]) {
-    postEntry(e);
+    postEntry(resource);
     postedKeys[keys] = true;
   }
 });
