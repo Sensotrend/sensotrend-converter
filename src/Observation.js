@@ -193,6 +193,7 @@ export default class Observation {
       },
     ];
     this.device = { display: deviceId };
+    this.identifier = [generateIdentifier(this)];
   }
 
   toString() {
@@ -255,7 +256,7 @@ export default class Observation {
       contained,
       extension,
       modifierExtension,
-      identifier = [generateIdentifier(this)],
+      identifier,
       basedOn,
       partOf,
       status = 'final',

@@ -225,6 +225,7 @@ export default class InsulinAdministration {
     this.device = [
       { display: deviceId },
     ];
+    this.identifier = [generateIdentifier(this)];
   }
 
   toString() {
@@ -284,7 +285,7 @@ export default class InsulinAdministration {
       contained,
       extension,
       modifierExtension,
-      identifier = [generateIdentifier(this)],
+      identifier,
       definition,
       instantiates,
       partOf,
