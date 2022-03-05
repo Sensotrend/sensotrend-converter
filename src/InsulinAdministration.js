@@ -238,7 +238,7 @@ export default class InsulinAdministration {
         `${
           l10n.typeOfInsulin[this.language]
         }${
-          this.dosage.text
+          this.medicationCodeableConcept.text
         }<br />${
           l10n.code[this.language]
         }${
