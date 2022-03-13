@@ -4,6 +4,7 @@ import {
   formatPeriod,
   formatTime,
   generateIdentifier,
+  getTidepoolIdentifier,
   l10n as l10nCore,
 } from './utils.js';
 
@@ -94,10 +95,10 @@ export default class InsulinAdministration {
   constructor(patient, entry, language) {
     const {
       deviceId,
-      payload,
       duration,
+      guid,
       normal,
-      percentage,
+      percent,
       rate,
       tbr,
       time,
@@ -140,7 +141,7 @@ export default class InsulinAdministration {
     let insulinType;
     switch (type) {
       case 'basal':
-        if (tbr !== undefined || percentage !== undefined) {
+        if ((tbr !== undefined) || (percent !== undefined)) {
           this.dosage.rateRatio = {
             numerator: {
               value: rate,
@@ -149,7 +150,7 @@ export default class InsulinAdministration {
               code: '[iU]',
             },
             denominator: {
-              value: 1 / (percentage || tbr),
+              value: 1 / (percent || tbr),
               unit: 'h',
               system: 'http://unitsofmeasure.org',
               code: 'h',
@@ -226,6 +227,9 @@ export default class InsulinAdministration {
       { display: deviceId },
     ];
     this.identifier = [generateIdentifier(this)];
+    if (!kantaRestrictions && guid) {
+      this.identifier.push(getTidepoolIdentifier(guid));
+    }
   }
 
   toString() {

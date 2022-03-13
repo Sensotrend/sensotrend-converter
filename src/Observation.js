@@ -4,6 +4,7 @@ import {
   formatPeriod,
   formatTime,
   generateIdentifier,
+  getTidepoolIdentifier,
   l10n as l10nCore,
   mgdl2mmoll,
   mmoll2mgdl,
@@ -124,7 +125,8 @@ export default class Observation {
     const {
       carbInput,
       deviceId,
-      payload,
+      guid,
+      subtype,
       time,
       timezoneOffset,
       type,
@@ -146,6 +148,17 @@ export default class Observation {
           'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
           'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
         ];
+        this.category = [
+          {
+            'coding': [
+              {
+                'system': 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
+                'code': 'nutrition',
+                'display': 'Ravitsemus',
+              }
+            ]
+          }
+        ];
         this.code = {
           coding: coding[wizard],
           text: l10n[type][this.language],
@@ -155,15 +168,19 @@ export default class Observation {
           ...unit.g,
         };
         break;
-      case cbg:
-        this.code = {
-          coding: coding[cbg][fixedUnit || units],
-          text: l10n[type][this.language],
-        };
-        // falls through
       case smbg:
-        this.code = this.code || {
-          coding: coding[smbg][fixedUnit || units],
+        if (subtype !== 'scanned') {
+          // Tidepool reports Freestyle Libre scans as SMBG,
+          // we treat them as cbg
+          this.code || {
+            coding: coding[smbg][fixedUnit || units],
+            text: l10n[type][this.language],
+          };
+        }
+        // falls through
+      case cbg:
+        this.code = this.code = {
+          coding: coding[cbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {
@@ -178,6 +195,19 @@ export default class Observation {
           'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
           'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
         ];
+        if (kantaRestrictions) {
+          // Glucose measurements are not really vitals, But KantaPHR insists they are...
+          this.category = this.category || [
+            {
+              'coding': [
+                {
+                  'system': 'http://hl7.org/fhir/observation-category',
+                  'code': 'vital-signs',
+                }
+              ]
+            }
+          ];
+        }
         break;
       default:
     }
@@ -194,6 +224,9 @@ export default class Observation {
     ];
     this.device = { display: deviceId };
     this.identifier = [generateIdentifier(this)];
+    if (!kantaRestrictions && guid) {
+      this.identifier.push(getTidepoolIdentifier(guid));
+    }
   }
 
   toString() {

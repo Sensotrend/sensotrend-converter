@@ -1,4 +1,5 @@
 import { v5 as uuidv5 } from 'uuid';
+import { kantaRestrictions } from './config.mjs';
 
 const GLUCOSE_MOLAR_MASS = 18.0156;
 
@@ -35,9 +36,29 @@ export function generateIdentifier(resource) {
       || valueInteger || valueRange || valueRatio || valueSampledData || valueTime || valueDateTime
       || valuePeriod)
   }`;
-  return {
+  const identifier = {
     system: 'urn:ietf:rfc:3986',
-    value: uuidv5(string, NAMESPACE),
+    value: `urn:uuid:${uuidv5(string, NAMESPACE)}`,
+  };
+  if (!kantaRestrictions) {
+    identifier.use = 'official',
+    identifier.assigner = {
+      type: 'Organization',
+      reference: 'https://www.sensotrend.com/',
+    };
+  }
+  return identifier;
+}
+
+export function getTidepoolIdentifier(guid) {
+  return {
+    assigner: {
+      type: 'Organization',
+      reference: 'https://www.tidepool.org/',
+    },
+    system: 'urn:ietf:rfc:3986',
+    // use: 'secondary',
+    value: `urn:uuid:${guid}`,
   };
 }
 
