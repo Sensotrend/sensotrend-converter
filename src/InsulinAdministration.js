@@ -99,7 +99,7 @@ export default class InsulinAdministration {
       guid,
       normal,
       percent,
-      rate,
+      rate = 0,
       tbr,
       time,
       timezoneOffset,
@@ -131,12 +131,19 @@ export default class InsulinAdministration {
 
     this.dosage = {
       dose: {
-        value: normal || ((rate * duration) / (60 * 60 * 1000)),
         unit: 'IU',
         system: 'http://unitsofmeasure.org',
         code: '[iU]',
       },
     };
+
+    if (normal !== undefined) {
+      this.dosage.dose.value = normal;
+    } else if (duration !== undefined) {
+      this.dosage.dose.value = ((rate * duration) / (60 * 60 * 1000));
+    } else {
+      this.dosage.dose.value = 0;
+    }
 
     let insulinType;
     switch (type) {
@@ -150,7 +157,7 @@ export default class InsulinAdministration {
               code: '[iU]',
             },
             denominator: {
-              value: 1 / (percent || tbr),
+              value: 1 / (percent || tbr || 1),
               unit: 'h',
               system: 'http://unitsofmeasure.org',
               code: 'h',
