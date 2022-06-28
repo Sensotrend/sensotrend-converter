@@ -1,6 +1,6 @@
 {
   "name": "sensotrend-converter",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "main": "src/index.mjs",
   "license": "BSD-2-Clause",
   "description": "Data format converter for managing various JSON data formats related to diabetes",
