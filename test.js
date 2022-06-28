@@ -1,6 +1,7 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import http from 'http';
+import https from 'https';
 
 import InsulinAdministration from './src/InsulinAdministration.js';
 import Observation from './src/Observation.js';
@@ -13,8 +14,76 @@ import Observation from './src/Observation.js';
 const require = createRequire(import.meta.url);
 const data = require('./data.json');
 
-// const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db'; // KantaPHR sandbox
+
+/* configs: */
+
+
+// HAPI
+/*
 const patient = '2821934'; // HAPI FHIR
+const postOptions = {
+  host: 'hapi.fhir.org',
+  port: '80',
+  path: '/baseR4',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/fhir+json',
+  },
+};
+const postBundle = true;
+const postKeys = true;
+const postEntries = false;
+*/
+
+// Kanta STU3
+/*
+const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db';
+const postOptions = {
+  host: 'fhirsandbox.kanta.fi',
+  port: '443',
+  path: '/phr-resourceserver/baseR4',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/fhir+json',
+  },
+};
+const postBundle = false;
+const postKeys = true;
+const postEntries = true;
+*/
+
+// Kanta R4
+/*
+const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db';
+const postOptions = {
+  host: 'fhirsandbox.kanta.fi',
+  port: '443',
+  path: '/phr-resourceserver/baseStu3',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/fhir+json',
+  },
+};
+const postBundle = false;
+const postKeys = true;
+const postEntries = true;
+*/
+
+
+
+const patient = '2821934'; // HAPI FHIR
+const postOptions = {
+  host: 'hapi.fhir.org',
+  port: '80',
+  path: '/baseR4',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/fhir+json',
+  },
+};
+const postBundle = true;
+const postKeys = true;
+const postEntries = false;
 
 const bundle = {
   resourceType: "Bundle",
@@ -58,20 +127,10 @@ try {
   console.error(err)
 }
 
-const postOptions = {
-  host: 'hapi.fhir.org',
-  port: '80',
-  path: '/baseR4',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/fhir+json',
-  },
-};
-
 function postEntry(e) {
   let responseChunks = [];
   const isBatchBundle = (e.resourceType === 'Bundle') && (e.type === 'batch');
-  const request = http.request({
+  const request = (postOptions.port != 443 ? http : https).request({
     ...postOptions,
     path: `${postOptions.path}/${
       isBatchBundle
@@ -84,12 +143,15 @@ function postEntry(e) {
       responseChunks.push(chunk);
     });
     res.on('error', function(chunk) {
-      console.error('Error: ' + chunk);
+      console.error('Error!', chunk);
     });
     res.on('end', function() {
       const resBody = responseChunks.join('');
-      const contentType = res.headers['content-type'];
-      const mimeType = contentType.substring(0, contentType.indexOf(';'));
+      const contentType = res.headers['content-type'] || 'application/fhir+json';
+      const charsetSeparatorIndex = contentType.indexOf(';');
+      const mimeType = charsetSeparatorIndex
+        ? contentType.substring(0, charsetSeparatorIndex)
+        : contentType;
       switch(mimeType) {
         case 'application/json':
         case 'application/fhir+json':
@@ -107,7 +169,7 @@ function postEntry(e) {
             }
           break;
         default:
-          console.error('Not parsing', contentType, resBody);
+          console.error('Not parsing', contentType, resBody, res.statusCode);
       }
     });
   });
@@ -121,38 +183,37 @@ function postEntry(e) {
 
 const postedKeys = {};
 
-postEntry(bundle);
+if (postBundle) {
+  postEntry(bundle);
+}
 
-bundle.entry.forEach((e) => {
-  const { resource } = e;
-  const keys = [
-    ...Object.keys(resource),
-    ...(resource.code?.coding || []).map(c => `code ${c.code || c.display || JSON.stringify(c)}`),
-    ...Object.keys(e.dosage || {})
-  ].join();
-  if (!postedKeys[keys]) {
-    postEntry(resource);
-    postedKeys[keys] = true;
-  }
-});
+if (postKeys) {
+  bundle.entry.forEach((e) => {
+    const { resource } = e;
+    const keys = [
+      ...Object.keys(resource),
+      ...(resource.code?.coding || []).map(c => `code ${c.code || c.display || JSON.stringify(c)}`),
+      ...Object.keys(e.dosage || {})
+    ].join();
+    if (!postedKeys[keys]) {
+      postEntry(resource);
+      postedKeys[keys] = true;
+    }
+  });
+  console.error('Posted keys', postedKeys);
+}
 
-console.error('Posted keys', postedKeys);
+if (postEntries) {
+  const MAX_ENTRY_COUNT = 1;
+  let i = 0;
 
-/*
-let i = 0;
-
-const intervalID = setInterval(() => {
-  if (i >= bundle.entry.length) {
-    clearInterval(intervalID);
-    return;
-  }
-  postEntry(bundle.entry[i].resource);
-  i += 1;
-}, 500);
-
-*/
-
-// bundle.entry.forEach((e) => postEntry(e.resource));
-
-
-
+  const intervalID = setInterval(() => {
+    if ((i >= MAX_ENTRY_COUNT) || (i >= bundle.entry.length)) {
+      clearInterval(intervalID);
+      return;
+    }
+    postEntry(bundle.entry[i].resource);
+    i += 1;
+  }, 500);
+  
+}
