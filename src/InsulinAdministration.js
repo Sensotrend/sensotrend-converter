@@ -1,4 +1,4 @@
-import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config';
+import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -7,7 +7,7 @@ import {
   getTidepoolIdentifier,
   getTime,
   l10n as l10nCore,
-} from './utils';
+} from './utils.js';
 
 export const [shortActing, longActing] = ['shortActing', 'longActing'];
 

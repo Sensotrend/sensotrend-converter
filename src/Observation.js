@@ -1,4 +1,4 @@
-import { defaultLanguage, fixedUnit, kantaRestrictions } from './config';
+import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -9,7 +9,7 @@ import {
   l10n as l10nCore,
   mgdl2mmoll,
   mmoll2mgdl,
-} from './utils';
+} from './utils.js';
 
 export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg', 'wizard'];
 

@@ -1,6 +1,6 @@
 import { v5 as uuidv5 } from 'uuid';
 
-import { defaultLanguage, kantaRestrictions } from './config';
+import { defaultLanguage, kantaRestrictions } from './config.js';
 
 const GLUCOSE_MOLAR_MASS = 18.0156;
 
