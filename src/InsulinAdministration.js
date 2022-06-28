@@ -1,4 +1,9 @@
-import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.js';
+import {
+  defaultLanguage,
+  diabetesDossierRestrictions,
+  kantaR4Restrictions,
+  kantaRestrictions,
+} from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -102,7 +107,6 @@ export default class InsulinAdministration {
       percent,
       rate = 0,
       tbr,
-      // time,
       timezoneOffset,
       type,
     } = entry;
@@ -110,12 +114,22 @@ export default class InsulinAdministration {
     const time = getTime(entry);
 
     this.resourceType = 'MedicationAdministration';
-    this.meta = {
-      profile: [
-        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
-        'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
-      ],
-    };
+
+    this.meta = {};
+    if (kantaR4Restrictions) {
+      // Support several profiles, but only Kanta PHR ones...
+      this.meta.profile = [
+        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-r4',
+      ];
+    } else {
+      this.meta.profile = kantaRestrictions
+        ? [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
+        ]
+        : [
+          'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
+        ];
+    }
 
     this.language = language || defaultLanguage;
 

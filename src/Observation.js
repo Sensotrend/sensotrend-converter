@@ -1,4 +1,9 @@
-import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.js';
+import {
+  defaultLanguage,
+  fixedUnit,
+  kantaR4Restrictions,
+  kantaRestrictions,
+} from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -38,6 +43,12 @@ const l10n = {
     en: 'Result',
     fi: 'Tulos',
     sv: 'Resultat',
+  },
+  nutritionCategory: {
+    de: 'Ernährung',
+    en: 'Nutrition',
+    fi: 'Ravitsemus',
+    sv: 'Näringstillstånd',
   },
 };
 
@@ -128,7 +139,6 @@ export default class Observation {
       deviceId,
       guid,
       subtype,
-      // time,
       timezoneOffset,
       type,
       units,
@@ -143,25 +153,34 @@ export default class Observation {
 
     switch (type) {
       case wizard:
-        this.meta.profile = kantaRestrictions
-          ? [
+        if (kantaR4Restrictions) {
+          // Kanta R4 supports several profiles, but only Kanta PHR ones...
+          this.meta.profile = [
             'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-          ]
-          : [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-            'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
           ];
-        this.category = [
-          {
-            coding: [
-              {
-                system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
-                code: 'nutrition',
-                display: 'Ravitsemus',
-              },
-            ],
-          },
-        ];
+        } else {
+          this.meta.profile = kantaRestrictions
+            ? [
+              'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3',
+            ]
+            : [
+              'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
+            ];
+        }
+        if (kantaRestrictions) {
+          // A Kanta PHR specific category definition
+          this.category = [
+            {
+              coding: [
+                {
+                  system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
+                  code: 'nutrition',
+                  display: l10n.nutritionCategory[this.language],
+                },
+              ],
+            },
+          ];
+        }
         this.code = {
           coding: coding[wizard],
           text: l10n[type][this.language],
@@ -190,21 +209,29 @@ export default class Observation {
           value: fixValue(value, units),
           ...unit[fixedUnit || units],
         };
-        this.meta.profile = kantaRestrictions
-          ? [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-          ]
-          : [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-            'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+        if (kantaR4Restrictions) {
+          // Support several profiles, but only Kanta PHR ones...
+          this.meta.profile = [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-bloodglucose',
           ];
+        } else {
+          this.meta.profile = kantaRestrictions
+            ? [
+              'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+            ]
+            : [
+              'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+            ];
+        }
         if (kantaRestrictions) {
           // Glucose measurements are not really vitals, But KantaPHR insists they are...
           this.category = this.category || [
             {
               coding: [
                 {
-                  system: 'http://hl7.org/fhir/observation-category',
+                  system: (!kantaR4Restrictions)
+                    ? 'http://hl7.org/fhir/observation-category'
+                    : 'http://terminology.hl7.org/CodeSystem/observation-category',
                   code: 'vital-signs',
                 },
               ],
