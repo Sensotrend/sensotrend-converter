@@ -29,5 +29,4 @@ jobs:
     - name: record code quality results with eslint
       run: npm run lint
     - name: record dependency safety check with npm audit
-      run: |
-        npm audit --production
+      run: npm audit --production
