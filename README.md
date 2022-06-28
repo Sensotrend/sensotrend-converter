@@ -1,14 +1,20 @@
 # Sensotred Converter
 
-This repository contains a package that converts data related to type 1 between
-different formats. The package is _not_ intended to retain the exact same data structures
-when data is converted to another format and then back - the conversion process aims to
-retain the specific data fields related to diabetes care. The fields that are retained
-across the conversion are
+Sensotrend Converter is a simple library that converts data from different formats into the
+[HL7 FHIR®](https://www.hl7.org/fhir/) format.
 
-1. Blood glucose information from CGM and glucometer devices
-2. Carbohydrate treatment information
-3. Insulin dosing information
+Recognized input formats are
+1. [Tidepool](https://www.tidepool.org/)
+   (see [docs](http://developer.tidepool.org/docs/) and
+   [source](https://github.com/tidepool-org/data-model))
+2. [Nightscout](http://www.nightscout.info/)
+   (see [source](https://github.com/nightscout/cgm-remote-monitor))
+   on a separate [nightscout](https://github.com/Sensotrend/sensotrend-converter/tree/nightscout) branch, with a more complicated, two-way architecture.
 
-The package uses ES8 Javascript features, so Node 12 or newer is required to use this package.
+Supported information is
+1. Blood glucose information from glucometers and continuous glucose monitors (CGM)
+2. Estimated carbohydrate intake from bolus calculators
+3. Insulin dosing information from insulin pumps and smart pens
 
+The HL7 FHIR data format is published in Simplifier, see both the [STU3](https://simplifier.net/finnishphr) and [R4](https://simplifier.net/finnishphrr4) versions.
+The converter is also compatible with the [Roche Diabetes Care](https://simplifier.net/rdcemrintegrations-v2) platform.
