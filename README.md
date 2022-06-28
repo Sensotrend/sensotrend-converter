@@ -1,7 +1,7 @@
 # Sensotred Converter
 
-Sensotrend Converter is a simple library that converts data from different formats into the
-[HL7 FHIR®](https://www.hl7.org/fhir/) format.
+Sensotrend Converter is a simple library that converts diabetes data from different formats into
+the [HL7 FHIR®](https://www.hl7.org/fhir/) format.
 
 Recognized input formats are
 1. [Tidepool](https://www.tidepool.org/)
