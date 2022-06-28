@@ -5,6 +5,7 @@ import {
   formatTime,
   generateIdentifier,
   getTidepoolIdentifier,
+  getTime,
   l10n as l10nCore,
   mgdl2mmoll,
   mmoll2mgdl,
@@ -127,12 +128,14 @@ export default class Observation {
       deviceId,
       guid,
       subtype,
-      time,
+      // time,
       timezoneOffset,
       type,
       units,
       value,
     } = entry;
+
+    const time = getTime(entry);
 
     this.resourceType = 'Observation';
     this.meta = {};

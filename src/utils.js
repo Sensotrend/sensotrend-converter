@@ -101,6 +101,22 @@ function pad(i) {
   return `${i < 10 ? '0' : ''}${i}`;
 }
 
+/*
+  "time": "2021-10-23T02:56:21.000Z",
+  "timezoneOffset": 180,
+  "clockDriftOffset": -255000,
+  "conversionOffset": -4194705000,
+  "deviceTime": "2021-09-04T16:44:36",
+ */
+export function getTime(entry) {
+  const {
+    conversionOffset,
+    time,
+  } = entry;
+  const fixedTime = new Date(new Date(time).getTime() + conversionOffset).toISOString();
+  return fixedTime;
+}
+
 export function adjustTime(time, timezoneOffset) {
   const date = new Date(new Date(time).getTime() + (timezoneOffset * 60 * 1000));
   const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
