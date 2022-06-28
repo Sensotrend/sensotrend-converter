@@ -8,7 +8,7 @@ export const longActingGroup = {
       language: 'fi',
       text: {
         status: 'generated',
-        div: `<div xmlns="http://www.w3.org/1999/xhtml">Koodi: Pitkävaikutteinen insuliini (ins-short-fast)<br />Aika: ${this.formattedDate}<br />Annos: ${this.insulin} IU<br />Laite: ${this.deviceId} (via ${this._converter})</div>`,
+        div: `<div xmlns="http://www.w3.org/1999/xhtml">Koodi: Pitkävaikutteinen insuliini (ins-intermediate-long)<br />Aika: ${this.formattedDate}<br />Annos: ${this.insulin} IU<br />Laite: ${this.deviceId} (via ${this._converter})</div>`,
       },
       identifier: [
         {
