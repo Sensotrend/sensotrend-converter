@@ -1,4 +1,4 @@
-import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.js';
+import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.mjs';
 import {
   adjustTime,
   formatPeriod,

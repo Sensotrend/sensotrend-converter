@@ -1,4 +1,4 @@
-import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.js';
+import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.mjs';
 import {
   adjustTime,
   formatPeriod,
