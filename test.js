@@ -123,8 +123,6 @@ const postedKeys = {};
 
 postEntry(bundle);
 
-// bundle.entry.forEach((e) => postEntry(e.resource));
-
 bundle.entry.forEach((e) => {
   const { resource } = e;
   const keys = [
@@ -139,3 +137,22 @@ bundle.entry.forEach((e) => {
 });
 
 console.error('Posted keys', postedKeys);
+
+/*
+let i = 0;
+
+const intervalID = setInterval(() => {
+  if (i >= bundle.entry.length) {
+    clearInterval(intervalID);
+    return;
+  }
+  postEntry(bundle.entry[i].resource);
+  i += 1;
+}, 500);
+
+*/
+
+// bundle.entry.forEach((e) => postEntry(e.resource));
+
+
+
