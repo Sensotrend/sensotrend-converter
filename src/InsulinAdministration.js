@@ -1,4 +1,4 @@
-import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.mjs';
+import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config';
 import {
   adjustTime,
   formatPeriod,
@@ -7,7 +7,7 @@ import {
   getTidepoolIdentifier,
   getTime,
   l10n as l10nCore,
-} from './utils.js';
+} from './utils';
 
 export const [shortActing, longActing] = ['shortActing', 'longActing'];
 
@@ -41,55 +41,55 @@ const l10n = {
 
 const coding = {
   [longActing]: diabetesDossierRestrictions
-  ? [
-    {
-      system: 'http://snomed.info/sct',
-      code: '25305005',
-      display: 'Long-acting insulin (substance)',
-    },
-  ]
-  : [
-    {
-      system: 'http://snomed.info/sct',
-      code: '25305005',
-      display: 'Long-acting insulin (substance)',
-    },
-    {
-      system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
-      code: 'ins-intermediate-long',
-      display: 'Pitkävaikutteinen insuliini',
-    },
-    {
-      system: 'http://snomed.info/sct',
-      code: '67866001',
-      display: 'Insulin (substance)',
-    },
-  ],
+    ? [
+      {
+        system: 'http://snomed.info/sct',
+        code: '25305005',
+        display: 'Long-acting insulin (substance)',
+      },
+    ]
+    : [
+      {
+        system: 'http://snomed.info/sct',
+        code: '25305005',
+        display: 'Long-acting insulin (substance)',
+      },
+      {
+        system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
+        code: 'ins-intermediate-long',
+        display: 'Pitkävaikutteinen insuliini',
+      },
+      {
+        system: 'http://snomed.info/sct',
+        code: '67866001',
+        display: 'Insulin (substance)',
+      },
+    ],
   [shortActing]: diabetesDossierRestrictions
-  ? [
-    {
-      system: 'http://snomed.info/sct',
-      code: '411531001',
-      display: 'Short-acting insulin (substance)',
-    },
-  ]
-  : [
-    {
-      system: 'http://snomed.info/sct',
-      code: '411531001',
-      display: 'Short-acting insulin (substance)',
-    },
-    {
-      system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
-      code: 'ins-short-fast',
-      display: 'Lyhytvaikutteinen insuliini',
-    },
-    {
-      system: 'http://snomed.info/sct',
-      code: '67866001',
-      display: 'Insulin (substance)',
-    },
-  ],
+    ? [
+      {
+        system: 'http://snomed.info/sct',
+        code: '411531001',
+        display: 'Short-acting insulin (substance)',
+      },
+    ]
+    : [
+      {
+        system: 'http://snomed.info/sct',
+        code: '411531001',
+        display: 'Short-acting insulin (substance)',
+      },
+      {
+        system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
+        code: 'ins-short-fast',
+        display: 'Lyhytvaikutteinen insuliini',
+      },
+      {
+        system: 'http://snomed.info/sct',
+        code: '67866001',
+        display: 'Insulin (substance)',
+      },
+    ],
 };
 
 export default class InsulinAdministration {
@@ -327,62 +327,62 @@ export default class InsulinAdministration {
     } = this;
 
     return kantaRestrictions
-    ? {
-      resourceType,
-      id,
-      meta,
-      implicitRules,
-      language,
-      text,
-      contained,
-      extension,
-      modifierExtension,
-      identifier,
-      status,
-      medicationCodeableConcept,
-      medicationReference,
-      subject,
-      effectiveDateTime,
-      effectivePeriod,
-      performer,
-      note,
-      dosage,
-    }
-    : {
-      resourceType,
-      id,
-      meta,
-      implicitRules,
-      language,
-      text,
-      contained,
-      extension,
-      modifierExtension,
-      identifier,
-      definition,
-      instantiates,
-      partOf,
-      status,
-      statusReason,
-      category,
-      medicationCodeableConcept,
-      medicationReference,
-      subject,
-      context,
-      supportingInformation,
-      effectiveDateTime,
-      effectivePeriod,
-      performer,
-      notGiven,
-      reasonNotGiven,
-      reasonCode,
-      reasonReference,
-      prescription,
-      request,
-      device,
-      note,
-      dosage,
-      eventHistory,
-    };
+      ? {
+        resourceType,
+        id,
+        meta,
+        implicitRules,
+        language,
+        text,
+        contained,
+        extension,
+        modifierExtension,
+        identifier,
+        status,
+        medicationCodeableConcept,
+        medicationReference,
+        subject,
+        effectiveDateTime,
+        effectivePeriod,
+        performer,
+        note,
+        dosage,
+      }
+      : {
+        resourceType,
+        id,
+        meta,
+        implicitRules,
+        language,
+        text,
+        contained,
+        extension,
+        modifierExtension,
+        identifier,
+        definition,
+        instantiates,
+        partOf,
+        status,
+        statusReason,
+        category,
+        medicationCodeableConcept,
+        medicationReference,
+        subject,
+        context,
+        supportingInformation,
+        effectiveDateTime,
+        effectivePeriod,
+        performer,
+        notGiven,
+        reasonNotGiven,
+        reasonCode,
+        reasonReference,
+        prescription,
+        request,
+        device,
+        note,
+        dosage,
+        eventHistory,
+      };
   }
 }

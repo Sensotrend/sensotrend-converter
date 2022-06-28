@@ -1,6 +1,6 @@
 import { v5 as uuidv5 } from 'uuid';
 
-import { defaultLanguage, kantaRestrictions } from './config.mjs';
+import { defaultLanguage, kantaRestrictions } from './config';
 
 const GLUCOSE_MOLAR_MASS = 18.0156;
 
@@ -49,7 +49,7 @@ export function generateIdentifier(resource) {
     value: `urn:uuid:${uuidv5(string, NAMESPACE)}`,
   };
   if (!kantaRestrictions) {
-    identifier.use = 'official',
+    identifier.use = 'official';
     identifier.assigner = {
       type: 'Organization',
       reference: 'https://www.sensotrend.com/',
@@ -125,7 +125,7 @@ export function adjustTime(time, timezoneOffset) {
 }
 
 export function formatTime(time, lng = defaultLanguage) {
-  return time.slice(11,19).replace(':', timeSeparator[lng] || ':');
+  return time.slice(11, 19).replace(':', timeSeparator[lng] || ':');
 }
 
 export function formatPeriod(period, lng = defaultLanguage) {

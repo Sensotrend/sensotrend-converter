@@ -1,4 +1,4 @@
-import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.mjs';
+import { defaultLanguage, fixedUnit, kantaRestrictions } from './config';
 import {
   adjustTime,
   formatPeriod,
@@ -9,7 +9,7 @@ import {
   l10n as l10nCore,
   mgdl2mmoll,
   mmoll2mgdl,
-} from './utils.js';
+} from './utils';
 
 export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg', 'wizard'];
 
@@ -144,23 +144,23 @@ export default class Observation {
     switch (type) {
       case wizard:
         this.meta.profile = kantaRestrictions
-        ? [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-        ]
-        : [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-          'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
-        ];
+          ? [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
+          ]
+          : [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
+            'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
+          ];
         this.category = [
           {
-            'coding': [
+            coding: [
               {
-                'system': 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
-                'code': 'nutrition',
-                'display': 'Ravitsemus',
-              }
-            ]
-          }
+                system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
+                code: 'nutrition',
+                display: 'Ravitsemus',
+              },
+            ],
+          },
         ];
         this.code = {
           coding: coding[wizard],
@@ -175,14 +175,14 @@ export default class Observation {
         if (subtype !== 'scanned') {
           // Tidepool reports Freestyle Libre scans as SMBG,
           // we treat them as cbg
-          this.code || {
+          this.code = {
             coding: coding[smbg][fixedUnit || units],
             text: l10n[type][this.language],
           };
         }
         // falls through
       case cbg:
-        this.code = this.code = {
+        this.code = this.code || {
           coding: coding[cbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
@@ -191,24 +191,24 @@ export default class Observation {
           ...unit[fixedUnit || units],
         };
         this.meta.profile = kantaRestrictions
-        ? [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-        ]
-        : [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-          'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
-        ];
+          ? [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+          ]
+          : [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+            'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+          ];
         if (kantaRestrictions) {
           // Glucose measurements are not really vitals, But KantaPHR insists they are...
           this.category = this.category || [
             {
-              'coding': [
+              coding: [
                 {
-                  'system': 'http://hl7.org/fhir/observation-category',
-                  'code': 'vital-signs',
-                }
-              ]
-            }
+                  system: 'http://hl7.org/fhir/observation-category',
+                  code: 'vital-signs',
+                },
+              ],
+            },
           ];
         }
         break;
@@ -334,90 +334,90 @@ export default class Observation {
     } = this;
 
     return kantaRestrictions
-    ? {
-      resourceType,
-      id,
-      meta,
-      implicitRules,
-      language,
-      text,
-      contained,
-      extension,
-      modifierExtension,
-      identifier,
-      status,
-      category,
-      code,
-      subject,
-      effectiveDateTime,
-      issued,
-      performer,
-      valueQuantity,
-      valueCodeableConcept,
-      valueString,
-      valueBoolean,
-      valueRange,
-      valueSampledData,
-      valueAttachment,
-      valueTime,
-      valueDateTime,
-      valuePeriod,
-      dataAbsentReason,
-      interpretation,
-      note,
-      comment,
-      referenceRange,
-      component,
-    }
-    : {
-      resourceType,
-      id,
-      meta,
-      implicitRules,
-      language,
-      text,
-      contained,
-      extension,
-      modifierExtension,
-      identifier,
-      basedOn,
-      partOf,
-      status,
-      category,
-      code,
-      subject,
-      context,
-      focus,
-      encounter,
-      effectiveDateTime,
-      effectivePeriod,
-      effectiveTiming,
-      effectiveInstant,
-      issued,
-      performer,
-      valueQuantity,
-      valueCodeableConcept,
-      valueString,
-      valueBoolean,
-      valueRange,
-      valueSampledData,
-      valueAttachment,
-      valueTime,
-      valueDateTime,
-      valuePeriod,
-      dataAbsentReason,
-      interpretation,
-      note,
-      comment,
-      bodySite,
-      method,
-      specimen,
-      device,
-      related,
-      referenceRange,
-      hasMember,
-      derivedFrom,
-      component,
-    };
+      ? {
+        resourceType,
+        id,
+        meta,
+        implicitRules,
+        language,
+        text,
+        contained,
+        extension,
+        modifierExtension,
+        identifier,
+        status,
+        category,
+        code,
+        subject,
+        effectiveDateTime,
+        issued,
+        performer,
+        valueQuantity,
+        valueCodeableConcept,
+        valueString,
+        valueBoolean,
+        valueRange,
+        valueSampledData,
+        valueAttachment,
+        valueTime,
+        valueDateTime,
+        valuePeriod,
+        dataAbsentReason,
+        interpretation,
+        note,
+        comment,
+        referenceRange,
+        component,
+      }
+      : {
+        resourceType,
+        id,
+        meta,
+        implicitRules,
+        language,
+        text,
+        contained,
+        extension,
+        modifierExtension,
+        identifier,
+        basedOn,
+        partOf,
+        status,
+        category,
+        code,
+        subject,
+        context,
+        focus,
+        encounter,
+        effectiveDateTime,
+        effectivePeriod,
+        effectiveTiming,
+        effectiveInstant,
+        issued,
+        performer,
+        valueQuantity,
+        valueCodeableConcept,
+        valueString,
+        valueBoolean,
+        valueRange,
+        valueSampledData,
+        valueAttachment,
+        valueTime,
+        valueDateTime,
+        valuePeriod,
+        dataAbsentReason,
+        interpretation,
+        note,
+        comment,
+        bodySite,
+        method,
+        specimen,
+        device,
+        related,
+        referenceRange,
+        hasMember,
+        derivedFrom,
+        component,
+      };
   }
 }
