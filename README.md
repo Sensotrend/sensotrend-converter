@@ -27,3 +27,18 @@ The converter is also compatible with the
 See the [bundle.json](./bundle.json) file for an example of produced data, a
 [batch](https://hl7.org/fhir/codesystem-bundle-type.html#bundle-type-batch)
 [Bundle](https://hl7.org/fhir/bundle.html) resource in HL7 FHIR format.
+
+## Acknowledgements
+
+©2022 [Sensotrend Oy](https://www.sensotrend.com/).
+
+The initial work has been supported by [HL7 Finland](https://www.hl7.fi/).
+
+Parts of the code have been implemented as part of the Diabetes Data
+Portability through Open Source Components (DiDaPOSC) project.
+
+The project has received funding from the [Next Generation Internet
+Initiative](https://www.ngi.eu/) (NGI) within the framework of the [DAPSI
+Project](https://dapsi.ngi.eu).
+
+European Union’s H2020 research and innovation programme under Grant Agreement no 871498.
