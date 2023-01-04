@@ -1,4 +1,9 @@
-import { defaultLanguage, fixedUnit, kantaRestrictions } from './config.js';
+import {
+  defaultLanguage,
+  fixedUnit,
+  kantaR4Restrictions,
+  kantaRestrictions,
+} from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -17,21 +22,27 @@ const l10n = {
   ...l10nCore,
   [wizard]: {
     de: 'Geschätzte Kohlenhydrataufnahme',
-    en: 'Estimated carbohydrate intake',
+    en: 'Carbohydrate intake Estimated',
     fi: 'Arvioitu hiilihydraattimäärä',
     sv: 'Beräknad mängd kolhydratintag',
   },
   [cbg]: {
     de: 'Gewebezucker',
-    en: 'Glucose in body fluid',
+    en: 'Glucose [Moles/volume] in Body fluid',
     fi: 'Kudossokeri',
     sv: 'Vävnadssocker',
   },
-  [smbg]: {
+  glucose: {
     de: 'Blutzucker',
-    en: 'Blood glucose',
+    en: 'Glucose [Moles/volume] in Blood',
     fi: 'Verensokeri',
     sv: 'Blodsocker',
+  },
+  [smbg]: {
+    de: 'Blutzucker mit Blutzuckermessgerät',
+    en: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+    fi: 'Verensokeri verensokerimittarilla',
+    sv: 'Blodsocker med blodsockermätare',
   },
   result: {
     de: 'Resultat',
@@ -39,59 +50,77 @@ const l10n = {
     fi: 'Tulos',
     sv: 'Resultat',
   },
+  nutritionCategory: {
+    de: 'Ernährung',
+    en: 'Nutrition',
+    fi: 'Ravitsemus',
+    sv: 'Näringstillstånd',
+  },
 };
 
-const coding = {
-  [wizard]: [
-    {
-      system: 'http://loinc.org',
-      code: '9059-7',
-      display: 'Carbohydrate intake Estimated',
+function getCoding(language) {
+  return {
+    [wizard]: [
+      {
+        system: 'http://loinc.org',
+        code: '9059-7',
+        display: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.wizard[language]
+          : 'Carbohydrate intake Estimated',
+      },
+    ],
+    [cbg]: {
+      [mgdl]: [
+        {
+          system: 'http://loinc.org',
+          code: '2344-0',
+          display: (kantaRestrictions || kantaR4Restrictions)
+            ? l10n.cbg[language]
+            : 'Glucose [Mass/volume] in Body fluid',
+        },
+      ],
+      [mmoll]: [
+        {
+          system: 'http://loinc.org',
+          code: '14745-4',
+          display: (kantaRestrictions || kantaR4Restrictions)
+            ? l10n.cbg[language]
+            : 'Glucose [Moles/volume] in Body fluid',
+        },
+      ],
     },
-  ],
-  [cbg]: {
-    [mgdl]: [
-      {
-        system: 'http://loinc.org',
-        code: '2344-0',
-        display: 'Glucose [Mass/volume] in Body fluid',
-      },
-    ],
-    [mmoll]: [
-      {
-        system: 'http://loinc.org',
-        code: '14745-4',
-        display: 'Glucose [Moles/volume] in Body fluid',
-      },
-    ],
-  },
-  [smbg]: {
-    [mgdl]: [
-      {
-        system: 'http://loinc.org',
-        code: '41653-7',
-        display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
-      },
-      {
-        system: 'http://loinc.org',
-        code: '2339-0',
-        display: 'Glucose [Mass/volume] in Blood',
-      },
-    ],
-    [mmoll]: [
-      {
-        system: 'http://loinc.org',
-        code: '14743-9',
-        display: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
-      },
-      {
-        system: 'http://loinc.org',
-        code: '15074-8',
-        display: 'Glucose [Moles/volume] in Blood',
-      },
-    ],
-  },
-};
+    [smbg]: {
+      [mgdl]: [
+        {
+          system: 'http://loinc.org',
+          code: '41653-7',
+          display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
+        },
+        {
+          system: 'http://loinc.org',
+          code: '2339-0',
+          display: 'Glucose [Mass/volume] in Blood',
+        },
+      ],
+      [mmoll]: [
+        {
+          system: 'http://loinc.org',
+          code: '14743-9',
+          display: (kantaRestrictions || kantaR4Restrictions)
+            ? l10n.smbg[language]
+            : 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+        },
+        {
+          system: 'http://loinc.org',
+          code: '15074-8',
+          displaydisplay: (kantaRestrictions || kantaR4Restrictions)
+            ? l10n.glucose[language]
+            : 'Glucose [Moles/volume] in Blood',
+        },
+      ],
+    },
+  };
+}
 
 const unit = {
   g: {
@@ -128,7 +157,6 @@ export default class Observation {
       deviceId,
       guid,
       subtype,
-      // time,
       timezoneOffset,
       type,
       units,
@@ -143,27 +171,36 @@ export default class Observation {
 
     switch (type) {
       case wizard:
-        this.meta.profile = kantaRestrictions
-          ? [
+        if (kantaR4Restrictions) {
+          // Kanta R4 supports several profiles, but only Kanta PHR ones...
+          this.meta.profile = [
             'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-          ]
-          : [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
-            'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
           ];
-        this.category = [
-          {
-            coding: [
-              {
-                system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
-                code: 'nutrition',
-                display: 'Ravitsemus',
-              },
-            ],
-          },
-        ];
+        } else {
+          this.meta.profile = kantaRestrictions
+            ? [
+              'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3',
+            ]
+            : [
+              'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
+            ];
+        }
+        if (kantaRestrictions) {
+          // A Kanta PHR specific category definition
+          this.category = [
+            {
+              coding: [
+                {
+                  system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-observationcategory',
+                  code: 'nutrition',
+                  display: l10n.nutritionCategory[this.language],
+                },
+              ],
+            },
+          ];
+        }
         this.code = {
-          coding: coding[wizard],
+          coding: getCoding(this.language)[wizard],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {
@@ -176,35 +213,43 @@ export default class Observation {
           // Tidepool reports Freestyle Libre scans as SMBG,
           // we treat them as cbg
           this.code = {
-            coding: coding[smbg][fixedUnit || units],
+            coding: getCoding(this.language)[smbg][fixedUnit || units],
             text: l10n[type][this.language],
           };
         }
         // falls through
       case cbg:
         this.code = this.code || {
-          coding: coding[cbg][fixedUnit || units],
+          coding: getCoding(this.language)[cbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {
           value: fixValue(value, units),
           ...unit[fixedUnit || units],
         };
-        this.meta.profile = kantaRestrictions
-          ? [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-          ]
-          : [
-            'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
-            'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+        if (kantaR4Restrictions) {
+          // Support several profiles, but only Kanta PHR ones...
+          this.meta.profile = [
+            'http://phr.kanta.fi/StructureDefinition/fiphr-sd-bloodglucose',
           ];
+        } else {
+          this.meta.profile = kantaRestrictions
+            ? [
+              'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
+            ]
+            : [
+              'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
+            ];
+        }
         if (kantaRestrictions) {
           // Glucose measurements are not really vitals, But KantaPHR insists they are...
           this.category = this.category || [
             {
               coding: [
                 {
-                  system: 'http://hl7.org/fhir/observation-category',
+                  system: (!kantaR4Restrictions)
+                    ? 'http://hl7.org/fhir/observation-category'
+                    : 'http://terminology.hl7.org/CodeSystem/observation-category',
                   code: 'vital-signs',
                 },
               ],
@@ -225,9 +270,13 @@ export default class Observation {
         reference: `Patient/${patient}`,
       },
     ];
-    this.device = { display: deviceId };
+    if (!kantaRestrictions && deviceId) {
+      this.device = [
+        { display: deviceId },
+      ];
+    }
     this.identifier = [generateIdentifier(this)];
-    if (!kantaRestrictions && guid) {
+    if (guid) {
       this.identifier.push(getTidepoolIdentifier(guid));
     }
   }

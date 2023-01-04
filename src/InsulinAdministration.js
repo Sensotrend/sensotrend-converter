@@ -1,4 +1,9 @@
-import { defaultLanguage, kantaRestrictions, diabetesDossierRestrictions } from './config.js';
+import {
+  defaultLanguage,
+  diabetesDossierRestrictions,
+  kantaR4Restrictions,
+  kantaRestrictions,
+} from './config.js';
 import {
   adjustTime,
   formatPeriod,
@@ -37,60 +42,74 @@ const l10n = {
     fi: 'Annos: ',
     sv: 'Dos: ',
   },
+  IU: {
+    de: 'IE: ',
+    en: 'IU',
+    fi: 'ky',
+    sv: 'IE',
+  },
+  h: {
+    de: 'Std.',
+    en: 'h',
+    fi: 't',
+    sv: 't',
+  },
 };
 
-const coding = {
-  [longActing]: diabetesDossierRestrictions
-    ? [
-      {
-        system: 'http://snomed.info/sct',
-        code: '25305005',
-        display: 'Long-acting insulin (substance)',
-      },
-    ]
-    : [
-      {
-        system: 'http://snomed.info/sct',
-        code: '25305005',
-        display: 'Long-acting insulin (substance)',
-      },
-      {
-        system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
-        code: 'ins-intermediate-long',
-        display: 'Pitkävaikutteinen insuliini',
-      },
-      {
-        system: 'http://snomed.info/sct',
-        code: '67866001',
-        display: 'Insulin (substance)',
-      },
-    ],
-  [shortActing]: diabetesDossierRestrictions
-    ? [
-      {
-        system: 'http://snomed.info/sct',
-        code: '411531001',
-        display: 'Short-acting insulin (substance)',
-      },
-    ]
-    : [
-      {
-        system: 'http://snomed.info/sct',
-        code: '411531001',
-        display: 'Short-acting insulin (substance)',
-      },
-      {
-        system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
-        code: 'ins-short-fast',
-        display: 'Lyhytvaikutteinen insuliini',
-      },
-      {
-        system: 'http://snomed.info/sct',
-        code: '67866001',
-        display: 'Insulin (substance)',
-      },
-    ],
-};
+function getCoding(language) {
+  return {
+    [longActing]: diabetesDossierRestrictions
+      ? [
+        {
+          system: 'http://snomed.info/sct',
+          code: '25305005',
+          display: 'Long-acting insulin (substance)',
+        },
+      ]
+      : [
+        {
+          system: 'http://snomed.info/sct',
+          code: '25305005',
+          display: 'Long-acting insulin (substance)',
+        },
+        {
+          system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
+          code: 'ins-intermediate-long',
+          display: l10n.longActing[language],
+        },
+        {
+          system: 'http://snomed.info/sct',
+          code: '67866001',
+          display: 'Insulin (substance)',
+        },
+      ],
+    [shortActing]: diabetesDossierRestrictions
+      ? [
+        {
+          system: 'http://snomed.info/sct',
+          code: '411531001',
+          display: 'Short-acting insulin (substance)',
+        },
+      ]
+      : [
+        {
+          system: 'http://snomed.info/sct',
+          code: '411531001',
+          display: 'Short-acting insulin (substance)',
+        },
+        {
+          system: 'http://phr.kanta.fi/CodeSystem/fiphr-cs-insulincode',
+          code: 'ins-short-fast',
+          display: l10n.shortActing[language],
+        },
+        {
+          system: 'http://snomed.info/sct',
+          code: '67866001',
+          display: 'Insulin (substance)',
+        },
+      ],
+  };
+}
 
 export default class InsulinAdministration {
   constructor(patient, entry, language) {
@@ -102,7 +121,6 @@ export default class InsulinAdministration {
       percent,
       rate = 0,
       tbr,
-      // time,
       timezoneOffset,
       type,
     } = entry;
@@ -110,12 +128,22 @@ export default class InsulinAdministration {
     const time = getTime(entry);
 
     this.resourceType = 'MedicationAdministration';
-    this.meta = {
-      profile: [
-        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
-        'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
-      ],
-    };
+
+    this.meta = {};
+    if (kantaR4Restrictions) {
+      // Support several profiles, but only Kanta PHR ones...
+      this.meta.profile = [
+        'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-r4',
+      ];
+    } else {
+      this.meta.profile = kantaRestrictions
+        ? [
+          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
+        ]
+        : [
+          'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
+        ];
+    }
 
     this.language = language || defaultLanguage;
 
@@ -186,7 +214,7 @@ export default class InsulinAdministration {
     }
 
     this.medicationCodeableConcept = {
-      coding: coding[insulinType],
+      coding: getCoding(this.language)[insulinType],
       text: l10n[insulinType][this.language],
     };
 
@@ -195,26 +223,32 @@ export default class InsulinAdministration {
     } ${
       this.dosage.dose.value.toFixed(2)
     } ${
-      this.dosage.dose.unit
+      l10n[this.dosage.dose.unit][this.language] || this.dosage.dose.unit || ''
     }${
       this.dosage.rateRatio
         ? ` (${
           this.dosage.rateRatio.numerator.comparator || ''
         }${
-          (this.dosage.rateRatio.numerator.value !== undefined)
-            ? this.dosage.rateRatio.numerator.value
+          !Number.isNaN(this.dosage.rateRatio.denominator.value)
+            ? `${this.dosage.rateRatio.numerator.value.toFixed(2)} ${
+              (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
+            }/${
+              (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
+            }, ${
+              (1 / this.dosage.rateRatio.denominator.value).toFixed(2)
+            } % = `
+            : ''
+        }${
+          this.dosage.rateRatio.numerator.value !== undefined
+            ? (this.dosage.rateRatio.numerator.value
+              / (this.dosage.rateRatio.denominator?.value || 1)).toFixed(2)
             : ''
         } ${
-          this.dosage.rateRatio.numerator.unit || ''
+          (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
         }/${
           this.dosage.rateRatio.denominator.comparator || ''
         }${
-          ((this.dosage.rateRatio.denominator.value !== undefined)
-          && (this.dosage.rateRatio.denominator.value !== 1))
-            ? `${this.dosage.rateRatio.denominator.value} `
-            : ''
-        }${
-          this.dosage.rateRatio.denominator.unit || ''
+          (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
         })`
         : ''
     }${this.dosage.rateQuantity
@@ -233,11 +267,13 @@ export default class InsulinAdministration {
     this.subject = {
       reference: `Patient/${patient}`,
     };
-    this.device = [
-      { display: deviceId },
-    ];
+    if (!kantaRestrictions && deviceId) {
+      this.device = [
+        { display: deviceId },
+      ];
+    }
     this.identifier = [generateIdentifier(this)];
-    if (!kantaRestrictions && guid) {
+    if (guid) {
       this.identifier.push(getTidepoolIdentifier(guid));
     }
   }
