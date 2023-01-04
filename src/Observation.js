@@ -20,13 +20,13 @@ export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg
 
 const l10n = {
   ...l10nCore,
-  wizard: {
+  [wizard]: {
     de: 'Geschätzte Kohlenhydrataufnahme',
     en: 'Carbohydrate intake Estimated',
     fi: 'Arvioitu hiilihydraattimäärä',
     sv: 'Beräknad mängd kolhydratintag',
   },
-  cbg: {
+  [cbg]: {
     de: 'Gewebezucker',
     en: 'Glucose [Moles/volume] in Body fluid',
     fi: 'Kudossokeri',
@@ -38,7 +38,7 @@ const l10n = {
     fi: 'Verensokeri',
     sv: 'Blodsocker',
   },
-  smbg: {
+  [smbg]: {
     de: 'Blutzucker mit Blutzuckermessgerät',
     en: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
     fi: 'Verensokeri verensokerimittarilla',
