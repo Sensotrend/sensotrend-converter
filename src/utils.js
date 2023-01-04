@@ -77,7 +77,7 @@ export function getTidepoolIdentifier(guid) {
       type: 'Organization',
       reference: 'https://www.tidepool.org/',
     };
-  } 
+  }
   return identifier;
 }
 
@@ -107,7 +107,6 @@ export const l10n = Object.freeze({
     sv: 'via ',
   }),
 });
-
 
 function pad(i) {
   return `${i < 10 ? '0' : ''}${i}`;

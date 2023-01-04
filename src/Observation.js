@@ -75,8 +75,8 @@ function getCoding(language) {
           system: 'http://loinc.org',
           code: '2344-0',
           display: (kantaRestrictions || kantaR4Restrictions)
-          ? l10n.cbg[language]
-          : 'Glucose [Mass/volume] in Body fluid',
+            ? l10n.cbg[language]
+            : 'Glucose [Mass/volume] in Body fluid',
         },
       ],
       [mmoll]: [
@@ -84,8 +84,8 @@ function getCoding(language) {
           system: 'http://loinc.org',
           code: '14745-4',
           display: (kantaRestrictions || kantaR4Restrictions)
-          ? l10n.cbg[language]
-          : 'Glucose [Moles/volume] in Body fluid',
+            ? l10n.cbg[language]
+            : 'Glucose [Moles/volume] in Body fluid',
         },
       ],
     },
@@ -107,15 +107,15 @@ function getCoding(language) {
           system: 'http://loinc.org',
           code: '14743-9',
           display: (kantaRestrictions || kantaR4Restrictions)
-          ? l10n.smbg[language]
-          : 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+            ? l10n.smbg[language]
+            : 'Glucose [Moles/volume] in Capillary blood by Glucometer',
         },
         {
           system: 'http://loinc.org',
           code: '15074-8',
           displaydisplay: (kantaRestrictions || kantaR4Restrictions)
-          ? l10n.glucose[language]
-          : 'Glucose [Moles/volume] in Blood',
+            ? l10n.glucose[language]
+            : 'Glucose [Moles/volume] in Blood',
         },
       ],
     },

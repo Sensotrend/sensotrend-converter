@@ -53,7 +53,7 @@ const l10n = {
     en: 'h',
     fi: 't',
     sv: 't',
-  }
+  },
 };
 
 function getCoding(language) {
@@ -229,22 +229,22 @@ export default class InsulinAdministration {
         ? ` (${
           this.dosage.rateRatio.numerator.comparator || ''
         }${
-          !isNaN(this.dosage.rateRatio.denominator.value)
-          ? `${this.dosage.rateRatio.numerator.value.toFixed(2)} ${
-            (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
-          }/${
-            (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
-          }, ${
-            (1 / this.dosage.rateRatio.denominator.value).toFixed(2)
-          } % = `
-          : ''
+          !Number.isNaN(this.dosage.rateRatio.denominator.value)
+            ? `${this.dosage.rateRatio.numerator.value.toFixed(2)} ${
+              (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
+            }/${
+              (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
+            }, ${
+              (1 / this.dosage.rateRatio.denominator.value).toFixed(2)
+            } % = `
+            : ''
         }${
           this.dosage.rateRatio.numerator.value !== undefined
-            ? (this.dosage.rateRatio.numerator.value /
-              (this.dosage.rateRatio.denominator?.value || 1)).toFixed(2)
+            ? (this.dosage.rateRatio.numerator.value
+              / (this.dosage.rateRatio.denominator?.value || 1)).toFixed(2)
             : ''
         } ${
-         (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
+          (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
         }/${
           this.dosage.rateRatio.denominator.comparator || ''
         }${
