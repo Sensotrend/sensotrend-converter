@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const data = require('./data.json');
 
 // const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db'; // KantaPHR sandbox
-const patient = '7255685'; // HAPI FHIR
+const patient = '7257379'; // HAPI FHIR
 
 const bundle = {
   resourceType: "Bundle",
