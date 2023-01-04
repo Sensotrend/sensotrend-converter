@@ -20,7 +20,7 @@ const data = require('./data.json');
 
 // HAPI
 /*
-const patient = '2821934'; // HAPI FHIR
+const patient = '7257379'; // HAPI FHIR
 const postOptions = {
   host: 'hapi.fhir.org',
   port: '80',
@@ -37,24 +37,7 @@ const postEntries = false;
 
 // Kanta STU3
 /*
-const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db';
-const postOptions = {
-  host: 'fhirsandbox.kanta.fi',
-  port: '443',
-  path: '/phr-resourceserver/baseR4',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/fhir+json',
-  },
-};
-const postBundle = false;
-const postKeys = true;
-const postEntries = true;
-*/
-
-// Kanta R4
-/*
-const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db';
+const patient = 'cafbe8e7-38fe-4807-b995-6770e5390365';
 const postOptions = {
   host: 'fhirsandbox.kanta.fi',
   port: '443',
@@ -69,7 +52,22 @@ const postKeys = true;
 const postEntries = true;
 */
 
-
+// Kanta R4
+/*
+const patient = '77c2c8d2-11ce-41d5-8150-75489f8b0b0a';
+const postOptions = {
+  host: 'fhirsandbox.kanta.fi',
+  port: '443',
+  path: '/phr-resourceserver/baseR4',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/fhir+json',
+  },
+};
+const postBundle = true;
+const postKeys = true;
+const postEntries = true;
+*/
 
 const patient = '7257379'; // HAPI FHIR
 const postOptions = {
@@ -84,6 +82,7 @@ const postOptions = {
 const postBundle = true;
 const postKeys = true;
 const postEntries = false;
+
 
 const bundle = {
   resourceType: "Bundle",
@@ -183,10 +182,6 @@ function postEntry(e) {
 
 const postedKeys = {};
 
-if (postBundle) {
-  postEntry(bundle);
-}
-
 if (postKeys) {
   bundle.entry.forEach((e) => {
     const { resource } = e;
@@ -200,7 +195,12 @@ if (postKeys) {
       postedKeys[keys] = true;
     }
   });
-  console.error('Posted keys', postedKeys);
+  console.error('Posted keys', postedKeys, 'to', postOptions.host);
+}
+
+if (postBundle) {
+  postEntry(bundle);
+  console.error('Posted bundle to', postOptions.host);
 }
 
 if (postEntries) {
