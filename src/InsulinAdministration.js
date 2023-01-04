@@ -42,6 +42,18 @@ const l10n = {
     fi: 'Annos: ',
     sv: 'Dos: ',
   },
+  IU: {
+    de: 'IE: ',
+    en: 'IU',
+    fi: 'ky',
+    sv: 'IE',
+  },
+  h: {
+    de: 'Std.',
+    en: 'h',
+    fi: 't',
+    sv: 't',
+  }
 };
 
 function getCoding(language) {
@@ -212,7 +224,7 @@ export default class InsulinAdministration {
     } ${
       this.dosage.dose.value.toFixed(2)
     } ${
-      this.dosage.dose.unit
+      l10n[this.dosage.dose.unit][this.language] || this.dosage.dose.unit || ''
     }${
       this.dosage.rateRatio
         ? ` (${
@@ -220,9 +232,9 @@ export default class InsulinAdministration {
         }${
           !isNaN(this.dosage.rateRatio.denominator.value)
           ? `${this.dosage.rateRatio.numerator.value.toFixed(2)} ${
-            this.dosage.rateRatio.numerator.unit || ''
+            (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
           }/${
-            this.dosage.rateRatio.denominator.unit || ''
+            (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
           }, ${
             (1 / this.dosage.rateRatio.denominator.value).toFixed(2)
           } % = `
@@ -233,11 +245,11 @@ export default class InsulinAdministration {
               (this.dosage.rateRatio.denominator?.value || 1)).toFixed(2)
             : ''
         } ${
-          this.dosage.rateRatio.numerator.unit || ''
+         (l10n[this.dosage.rateRatio.numerator.unit] || {})[this.language] || ''
         }/${
           this.dosage.rateRatio.denominator.comparator || ''
         }${
-          this.dosage.rateRatio.denominator.unit || ''
+          (l10n[this.dosage.rateRatio.denominator.unit] || {})[this.language] || ''
         })`
         : ''
     }${this.dosage.rateQuantity
