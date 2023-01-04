@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const data = require('./data.json');
 
 // const patient = 'fd1cc196-7fe5-42eb-ab7c-b4b1225a33db'; // KantaPHR sandbox
-const patient = '7253554'; // HAPI FHIR
+const patient = '7255685'; // HAPI FHIR
 
 const bundle = {
   resourceType: "Bundle",
@@ -121,8 +121,6 @@ function postEntry(e) {
 
 const postedKeys = {};
 
-postEntry(bundle);
-
 bundle.entry.forEach((e) => {
   const { resource } = e;
   const keys = [
@@ -138,7 +136,10 @@ bundle.entry.forEach((e) => {
 
 console.error('Posted keys', postedKeys);
 
+postEntry(bundle);
+
 /*
+
 let i = 0;
 
 const intervalID = setInterval(() => {
@@ -150,6 +151,7 @@ const intervalID = setInterval(() => {
   i += 1;
 }, 500);
 
+/*
 */
 
 // bundle.entry.forEach((e) => postEntry(e.resource));
