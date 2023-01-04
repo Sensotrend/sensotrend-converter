@@ -141,7 +141,6 @@ export default class InsulinAdministration {
           'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-stu3',
         ]
         : [
-          'http://phr.kanta.fi/StructureDefinition/fiphr-sd-insulindosing-r4',
           'http://roche.com/fhir/rdc/StructureDefinition/medication-administration',
         ];
     }
@@ -268,11 +267,13 @@ export default class InsulinAdministration {
     this.subject = {
       reference: `Patient/${patient}`,
     };
-    this.device = [
-      { display: deviceId },
-    ];
+    if (!kantaRestrictions && deviceId) {
+      this.device = [
+        { display: deviceId },
+      ];
+    }
     this.identifier = [generateIdentifier(this)];
-    if (!kantaRestrictions && guid) {
+    if (guid) {
       this.identifier.push(getTidepoolIdentifier(guid));
     }
   }

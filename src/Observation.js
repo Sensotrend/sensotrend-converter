@@ -182,7 +182,6 @@ export default class Observation {
               'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake-stu3',
             ]
             : [
-              'http://phr.kanta.fi/StructureDefinition/fiphr-sd-macronutrientintake',
               'http://roche.com/fhir/rdc/StructureDefinition/observation-carbs',
             ];
         }
@@ -239,7 +238,6 @@ export default class Observation {
               'http://phr.kanta.fi/StructureDefinition/fiphr-bloodglucose-stu3',
             ]
             : [
-              'http://phr.kanta.fi/StructureDefinition/fiphr-sd-bloodglucose',
               'http://roche.com/fhir/rdc/StructureDefinition/bg-observation',
             ];
         }
@@ -272,9 +270,13 @@ export default class Observation {
         reference: `Patient/${patient}`,
       },
     ];
-    this.device = { display: deviceId };
+    if (!kantaRestrictions && deviceId) {
+      this.device = [
+        { display: deviceId },
+      ];
+    }
     this.identifier = [generateIdentifier(this)];
-    if (!kantaRestrictions && guid) {
+    if (guid) {
       this.identifier.push(getTidepoolIdentifier(guid));
     }
   }

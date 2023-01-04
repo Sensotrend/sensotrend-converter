@@ -54,9 +54,9 @@ export function generateIdentifier(resource) {
   const identifier = {
     system: 'urn:ietf:rfc:3986',
     value: `urn:uuid:${uuidv5(string, NAMESPACE)}`,
+    use: 'official',
   };
   if (!kantaRestrictions) {
-    identifier.use = 'official';
     identifier.assigner = {
       type: 'Organization',
       reference: 'https://www.sensotrend.com/',
@@ -66,15 +66,19 @@ export function generateIdentifier(resource) {
 }
 
 export function getTidepoolIdentifier(guid) {
-  return {
-    assigner: {
-      type: 'Organization',
-      reference: 'https://www.tidepool.org/',
-    },
+  const identifier = {
     system: 'urn:ietf:rfc:3986',
-    // use: 'secondary',
     value: `urn:uuid:${guid}`,
   };
+  if (kantaRestrictions) {
+    identifier.use = 'secondary';
+  } else {
+    identifier.assigner = {
+      type: 'Organization',
+      reference: 'https://www.tidepool.org/',
+    };
+  } 
+  return identifier;
 }
 
 export const l10n = Object.freeze({
