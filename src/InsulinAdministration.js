@@ -218,18 +218,24 @@ export default class InsulinAdministration {
         ? ` (${
           this.dosage.rateRatio.numerator.comparator || ''
         }${
-          (this.dosage.rateRatio.numerator.value !== undefined)
-            ? this.dosage.rateRatio.numerator.value
+          !isNaN(this.dosage.rateRatio.denominator.value)
+          ? `${this.dosage.rateRatio.numerator.value.toFixed(2)} ${
+            this.dosage.rateRatio.numerator.unit || ''
+          }/${
+            this.dosage.rateRatio.denominator.unit || ''
+          }, ${
+            (1 / this.dosage.rateRatio.denominator.value).toFixed(2)
+          } % = `
+          : ''
+        }${
+          this.dosage.rateRatio.numerator.value !== undefined
+            ? (this.dosage.rateRatio.numerator.value /
+              (this.dosage.rateRatio.denominator?.value || 1)).toFixed(2)
             : ''
         } ${
           this.dosage.rateRatio.numerator.unit || ''
         }/${
           this.dosage.rateRatio.denominator.comparator || ''
-        }${
-          ((this.dosage.rateRatio.denominator.value !== undefined)
-          && (this.dosage.rateRatio.denominator.value !== 1))
-            ? `${this.dosage.rateRatio.denominator.value} `
-            : ''
         }${
           this.dosage.rateRatio.denominator.unit || ''
         })`
