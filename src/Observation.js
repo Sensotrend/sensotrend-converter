@@ -20,23 +20,29 @@ export const [cbg, mgdl, mmoll, smbg, wizard] = ['cbg', 'mg/dL', 'mmol/L', 'smbg
 
 const l10n = {
   ...l10nCore,
-  [wizard]: {
+  wizard: {
     de: 'Geschätzte Kohlenhydrataufnahme',
-    en: 'Estimated carbohydrate intake',
+    en: 'Carbohydrate intake Estimated',
     fi: 'Arvioitu hiilihydraattimäärä',
     sv: 'Beräknad mängd kolhydratintag',
   },
-  [cbg]: {
+  cbg: {
     de: 'Gewebezucker',
-    en: 'Glucose in body fluid',
+    en: 'Glucose [Moles/volume] in Body fluid',
     fi: 'Kudossokeri',
     sv: 'Vävnadssocker',
   },
-  [smbg]: {
+  glucose: {
     de: 'Blutzucker',
-    en: 'Blood glucose',
+    en: 'Glucose [Moles/volume] in Blood',
     fi: 'Verensokeri',
     sv: 'Blodsocker',
+  },
+  smbg: {
+    de: 'Blutzucker mit Blutzuckermessgerät',
+    en: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+    fi: 'Verensokeri verensokerimittarilla',
+    sv: 'Blodsocker med blodsockermätare',
   },
   result: {
     de: 'Resultat',
@@ -52,57 +58,69 @@ const l10n = {
   },
 };
 
-const coding = {
-  [wizard]: [
-    {
-      system: 'http://loinc.org',
-      code: '9059-7',
-      display: 'Carbohydrate intake Estimated',
+function getCoding(language) {
+  return {
+    [wizard]: [
+      {
+        system: 'http://loinc.org',
+        code: '9059-7',
+        display: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.wizard[language]
+          : 'Carbohydrate intake Estimated',
+      },
+    ],
+    [cbg]: {
+      [mgdl]: [
+        {
+          system: 'http://loinc.org',
+          code: '2344-0',
+          display: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.cbg[language]
+          : 'Glucose [Mass/volume] in Body fluid',
+        },
+      ],
+      [mmoll]: [
+        {
+          system: 'http://loinc.org',
+          code: '14745-4',
+          display: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.cbg[language]
+          : 'Glucose [Moles/volume] in Body fluid',
+        },
+      ],
     },
-  ],
-  [cbg]: {
-    [mgdl]: [
-      {
-        system: 'http://loinc.org',
-        code: '2344-0',
-        display: 'Glucose [Mass/volume] in Body fluid',
-      },
-    ],
-    [mmoll]: [
-      {
-        system: 'http://loinc.org',
-        code: '14745-4',
-        display: 'Glucose [Moles/volume] in Body fluid',
-      },
-    ],
-  },
-  [smbg]: {
-    [mgdl]: [
-      {
-        system: 'http://loinc.org',
-        code: '41653-7',
-        display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
-      },
-      {
-        system: 'http://loinc.org',
-        code: '2339-0',
-        display: 'Glucose [Mass/volume] in Blood',
-      },
-    ],
-    [mmoll]: [
-      {
-        system: 'http://loinc.org',
-        code: '14743-9',
-        display: 'Glucose [Moles/volume] in Capillary blood by Glucometer',
-      },
-      {
-        system: 'http://loinc.org',
-        code: '15074-8',
-        display: 'Glucose [Moles/volume] in Blood',
-      },
-    ],
-  },
-};
+    [smbg]: {
+      [mgdl]: [
+        {
+          system: 'http://loinc.org',
+          code: '41653-7',
+          display: 'Glucose [Mass/volume] in Capillary blood by Glucometer',
+        },
+        {
+          system: 'http://loinc.org',
+          code: '2339-0',
+          display: 'Glucose [Mass/volume] in Blood',
+        },
+      ],
+      [mmoll]: [
+        {
+          system: 'http://loinc.org',
+          code: '14743-9',
+          display: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.smbg[language]
+          : 'Glucose [Moles/volume] in Capillary blood by Glucometer',
+        },
+        {
+          system: 'http://loinc.org',
+          code: '15074-8',
+          displaydisplay: (kantaRestrictions || kantaR4Restrictions)
+          ? l10n.glucose[language]
+          : 'Glucose [Moles/volume] in Blood',
+        },
+      ],
+    },
+  };
+}
 
 const unit = {
   g: {
@@ -183,7 +201,7 @@ export default class Observation {
           ];
         }
         this.code = {
-          coding: coding[wizard],
+          coding: getCoding(this.language)[wizard],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {
@@ -196,14 +214,14 @@ export default class Observation {
           // Tidepool reports Freestyle Libre scans as SMBG,
           // we treat them as cbg
           this.code = {
-            coding: coding[smbg][fixedUnit || units],
+            coding: getCoding(this.language)[smbg][fixedUnit || units],
             text: l10n[type][this.language],
           };
         }
         // falls through
       case cbg:
         this.code = this.code || {
-          coding: coding[cbg][fixedUnit || units],
+          coding: getCoding(this.language)[cbg][fixedUnit || units],
           text: l10n[type][this.language],
         };
         this.valueQuantity = {

@@ -13,6 +13,13 @@ const timeSeparator = {
   sv: '.',
 };
 
+const dateFormat = {
+  de: 'dd.mm.YYYY',
+  en: 'm/d/YYYY',
+  fi: 'd.m.YYYY',
+  sv: 'd.m.YYYY',
+};
+
 export function generateIdentifier(resource) {
   const {
     resourceType,
@@ -97,10 +104,27 @@ export const l10n = Object.freeze({
   }),
 });
 
+
 function pad(i) {
   return `${i < 10 ? '0' : ''}${i}`;
 }
 
+function getDateString(time, language) {
+  const date = new Date(time);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return dateFormat[language]
+    .replace('YYYY', year)
+    .replace('mm', pad(month))
+    .replace('m', month)
+    .replace('dd', pad(day))
+    .replace('d', day);
+}
+
+function getTimeString(time, language) {
+  return time.slice(11, 19).replace(':', timeSeparator[language] || ':');
+}
 /*
   "time": "2021-10-23T02:56:21.000Z",
   "timezoneOffset": 180,
@@ -121,14 +145,26 @@ export function adjustTime(time, timezoneOffset) {
   const date = new Date(new Date(time).getTime() + (timezoneOffset * 60 * 1000));
   const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
   const offsetMinutes = Math.abs(timezoneOffset % 60);
-  return date.toISOString().replace('Z', `${timezoneOffset >= 0 ? '+' : '-'}${pad(offsetHours)}:${pad(offsetMinutes)}`);
+  return date.toISOString()
+    .replace('Z', `${timezoneOffset >= 0 ? '+' : '-'}${pad(offsetHours)}:${pad(offsetMinutes)}`);
 }
 
 export function formatTime(time, lng = defaultLanguage) {
-  return time.slice(11, 19).replace(':', timeSeparator[lng] || ':');
+  const dateString = getDateString(time, lng);
+  const timeString = getTimeString(time, lng);
+  return `${dateString} ${timeString}`;
 }
 
 export function formatPeriod(period, lng = defaultLanguage) {
+  if (period.start.substring(0, 11) === period.end.substring(0, 11)) {
+    return `${
+      getDateString(period.start, lng)
+    } ${
+      getTimeString(period.start, lng)
+    } - ${
+      getTimeString(period.end, lng)
+    }`;
+  }
   return `${formatTime(period.start, lng)} - ${formatTime(period.end, lng)}`;
 }
 

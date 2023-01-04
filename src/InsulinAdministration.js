@@ -274,7 +274,7 @@ export default class InsulinAdministration {
         }<br />${
           l10n.code[this.language]
         }${
-          this.medicationCodeableConcept.getCoding(this.language).map((c) => `${
+          this.medicationCodeableConcept.coding.map((c) => `${
             c.system === 'http://snomed.info/sct' ? 'SNOMED ' : ''
           }${
             c.code
