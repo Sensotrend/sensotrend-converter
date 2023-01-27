@@ -14,7 +14,7 @@
   "repository": "https://github.com/sensotrend/sensotrend-converter",
   "dependencies": {
     "fs-extra": "^10.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "node-cache": "^5.1.2",
     "stjs": "0.0.5",
     "uuid": "^3.3.2"
@@ -34,7 +34,7 @@
     "nyc": "^15.1.0",
     "should": "^13.2.3",
     "source-map-support": "^0.5.11",
-    "supertest": "^6.1.6"
+    "supertest": "^6.3.3"
   },
   "nyc": {
     "all": false,
@@ -46,8 +46,8 @@
     ]
   },
   "engines": {
-    "node": "^12.2.0",
-    "npm": "6.x"
+    "node": ">=12.2.0",
+    "npm": ">=6.x"
   },
   "scripts": {
     "docs": "rm -rf ./docs && jsdoc --configure .jsdoc.json",
