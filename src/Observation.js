@@ -271,9 +271,7 @@ export default class Observation {
       },
     ];
     if (!kantaRestrictions && deviceId) {
-      this.device = [
-        { display: deviceId },
-      ];
+      this.device = { display: deviceId };
     }
     this.identifier = [generateIdentifier(this)];
     if (guid) {
