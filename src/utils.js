@@ -58,8 +58,11 @@ export function generateIdentifier(resource) {
   };
   if (!kantaRestrictions) {
     identifier.assigner = {
-      type: 'Organization',
-      reference: 'https://www.sensotrend.com/',
+      identifier: {
+        system: 'urn:ietf:rfc:3986',
+        value: 'https://www.sensotrend.com/',
+      },
+      display: 'Sensotrend Oy',
     };
   }
   return identifier;
@@ -69,13 +72,15 @@ export function getTidepoolIdentifier(guid) {
   const identifier = {
     system: 'urn:ietf:rfc:3986',
     value: `urn:uuid:${guid}`,
+    use: 'secondary',
   };
-  if (kantaRestrictions) {
-    identifier.use = 'secondary';
-  } else {
+  if (!kantaRestrictions) {
     identifier.assigner = {
-      type: 'Organization',
-      reference: 'https://www.tidepool.org/',
+      identifier: {
+        system: 'urn:ietf:rfc:3986',
+        value: 'https://www.tidepool.org/',
+      },
+      display: 'Tidepool',
     };
   }
   return identifier;
