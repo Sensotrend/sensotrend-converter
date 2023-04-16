@@ -2,6 +2,7 @@ import { createRequire } from 'module';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import { v4 as uuidv4 } from 'uuid';
 
 import InsulinAdministration from './src/InsulinAdministration.js';
 import Observation from './src/Observation.js';
@@ -111,6 +112,7 @@ data.forEach((d) => {
       return;
   }
   bundle.entry.push({
+    fullUrl: `urn:uuid:${uuidv4()}`,
     resource,
     request: {
       url: `${resource.resourceType}/`,
