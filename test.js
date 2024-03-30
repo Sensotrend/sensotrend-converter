@@ -70,11 +70,11 @@ const postKeys = true;
 const postEntries = true;
 */
 
-const patient = '7257379'; // HAPI FHIR
+const patient = '77c2c8d2-11ce-41d5-8150-75489f8b0b0a';
 const postOptions = {
-  host: 'hapi.fhir.org',
-  port: '80',
-  path: '/baseR4',
+  host: 'fhirsandbox.kanta.fi',
+  port: '443',
+  path: '/phr-resourceserver/baseR4',
   method: 'POST',
   headers: {
     'Content-Type': 'application/fhir+json',
@@ -82,7 +82,7 @@ const postOptions = {
 };
 const postBundle = true;
 const postKeys = true;
-const postEntries = false;
+const postEntries = true;
 
 
 const bundle = {
@@ -90,6 +90,8 @@ const bundle = {
   type: "batch",
   entry: [],
 };
+
+const MAX_BUNDLE_SIZE = 300;
 
 data.forEach((d) => {
   let resource;
@@ -111,15 +113,17 @@ data.forEach((d) => {
       console.error(`Unhandled type ${d.type}`, d);
       return;
   }
-  bundle.entry.push({
-    fullUrl: `urn:uuid:${uuidv4()}`,
-    resource,
-    request: {
-      url: `${resource.resourceType}/`,
-      method: 'POST',
-      ifNoneExist: 'identifier=' + resource.identifier[0]?.value,
-    },
-  });
+  if (bundle.entry.length < MAX_BUNDLE_SIZE) {
+    bundle.entry.push({
+      fullUrl: `urn:uuid:${uuidv4()}`,
+      resource,
+      request: {
+        url: `${resource.resourceType}/`,
+        method: 'POST',
+        ifNoneExist: 'identifier=' + resource.identifier[0]?.value,
+      },
+    });
+  }
 });
 
 try {
